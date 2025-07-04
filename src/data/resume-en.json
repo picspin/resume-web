@@ -1,0 +1,344 @@
+{
+  "general": {
+    "name": "Xiaolei Zhu, PhD",
+    "address": "Guangzhou, Guangdong, China, 510168",
+    "email_work": "xiaolei.zhu@bayer.com",
+    "email_private": "zxl1412@gmail.com",
+    "tel": "+49 15203046915 (DE); +86 18607106505 (CN)"
+  },
+  "summary": "Dynamic Application Manager with 10 years of experience in medical imaging, digital healthcare solutions, and data-driven innovation, possessing deep healthcare insights and a wealth of academic achievements. Adept at driving innovation and operational excellence in medical imaging solutions, with expertise in product strategy and project management, successfully implementing complex projects and enhancing product portfolio performance in the Chinese market. Skilled in analytical thinking to develop new business opportunities that meet market demands. Experienced in cross-functional collaboration, leading teams to deliver high-impact clinical applications and solutions. Committed to advancing the healthcare industry through effective communication and customer-centric services.",
+  "education": [
+    {
+      "degree": "PhD",
+      "major": "Magnetic Resonance Imaging & Molecular Imaging Application Development",
+      "institution": "Wuhan Institute of Physics and Mathematics, Chinese Academy of Sciences",
+      "date": "2011-2015",
+      "year": "2015"
+    },
+    {
+      "degree": "Bachelor",
+      "major": "Chemical Engineering",
+      "institution": "Wuhan Institute of Technology",
+      "date": "2003-2007",
+      "year": "2007"
+    }
+  ],
+  "work": [
+    {
+      "title": "Senior Application Manager",
+      "company": "Bayer Healthcare China",
+      "date": "May 2024 – Present",
+      "location": "Guangzhou, China",
+      "details": [
+        "Spearheaded clinical development for Bayer's radiology products, creating disease-based integrated solutions to drive business growth.",
+        "Developed innovative business models to provide comprehensive clinical application and scientific services to clients.",
+        "Integrated resources to develop clinical digital tools like ROICalc and Thermostat, enhancing client business performance, and created an AI-powered training chatbot using RAG to improve internal communication efficiency."
+      ]
+    },
+    {
+      "title": "Digital Solution Brand Management Manager",
+      "company": "Bayer AG - Global Radiology",
+      "date": "March 2023 – May 2024",
+      "location": "Berlin, Germany",
+      "details": [
+        "Planned and strategically developed Bayer's radiology digital market research platform, leveraging Google Cloud to enhance business intelligence and data-driven decision-making.",
+        "Led the digital health portfolio strategy for AI-driven medical imaging solutions, integrating cutting-edge technology into preclinical research workflows.",
+        "Directed cross-functional projects to ensure digital solutions aligned with global R&D portfolio management goals."
+      ]
+    },
+    {
+      "title": "Radiology Solution Marketing Associate Manager",
+      "company": "Bayer AG - Global Radiology",
+      "date": "August 2022 – February 2023",
+      "location": "Berlin, Germany",
+      "details": [
+        "Drove agile and Scrum operations to optimize global multi-product line imaging workflows (including liver, prostate, etc.).",
+        "Coordinated with regional teams across 21 countries to promote the IAWS pilot project, integrating software, medical devices, and pharmaceuticals to improve operational efficiency and product synergy.",
+        "Led the A-map clinical project for liver cancer, aligning the product roadmap with the needs of the APAC and China markets."
+      ]
+    },
+    {
+      "title": "Radiology Marketing Associate",
+      "company": "Bayer APAC",
+      "date": "December 2021 – July 2022",
+      "location": "Singapore",
+      "details": [
+        "Responsible for the design and implementation of the MRI brand transformation plan in the APAC market, increasing market share and product penetration.",
+        "Developed and implemented marketing strategies tailored to regional market needs, ensuring successful product launches and market expansion."
+      ]
+    },
+    {
+      "title": "Digital Solution Manager (Concurrent)",
+      "company": "Bayer AG - China Radiology",
+      "date": "January 2021 – November 2021",
+      "location": "Guangzhou, China",
+      "details": [
+        "Led the development and execution of the digital platform product roadmap, laying the foundation for future product launches.",
+        "Innovated marketing strategies to enhance the company's market position and competitiveness in the digital solutions sector."
+      ]
+    },
+    {
+      "title": "Application Expert",
+      "company": "Bayer AG - China Radiology",
+      "date": "January 2018 – November 2021",
+      "location": "China",
+      "details": [
+        "Provided internal and external scientific and technical support, initiated innovative projects to drive new business solutions and sales growth.",
+        "As a project leader, coordinated multi-stakeholder resources to ensure the successful implementation of preclinical research projects.",
+        "Led customer-centric projects to improve service quality and customer relationships."
+      ]
+    },
+    {
+      "title": "Scientific Specialist",
+      "company": "Siemens Healthineers",
+      "date": "September 2015 – December 2017",
+      "location": "Guangzhou, China",
+      "details": [
+        "Collaborated with cross-functional teams to advance translational medicine research from clinical trials to market promotion.",
+        "Managed scientific marketing projects, provided technical support, and drove new product development.",
+        "Led the implementation of the China WIP project, promoting MRI technology and scientific research advancement."
+      ]
+    },
+    {
+      "title": "Assistant Lecturer",
+      "company": "Hubei Polytechnic University",
+      "date": "August 2010 – September 2011",
+      "location": "Huangshi, Hubei",
+      "details": ["Responsible for teaching medical imaging and related courses, and assisting in scientific research."]
+    }
+  ],
+  "skills": [
+    "Medical Physics & Biomedical Engineering: Magnetic resonance physics and molecular imaging, MR sequence application and development, medical imaging post-processing and data analysis.",
+    "Software Development: Data science and artificial intelligence (AI algorithms, machine learning, deep learning, CNN/FACN, MONAI, LLM, RAG, LangChain), full-stack programming in R, Python, Matlab, SQL, containerization technologies, cloud computing, and data lakes.",
+    "Scientific Writing & Research: Extensive research experience with numerous publications, patents, and code projects.",
+    "Market Research & Analysis: Data science insights, market strategy and product roadmap design and development, business-driven and customer-oriented mindset.",
+    "Collaboration & Communication: Strong cross-functional collaboration skills, excellent communication abilities, clinical and technical orientation, positive customer reputation, and recognition from industry associations."
+  ],
+  "projects": [
+    {
+      "projectNumber": 1,
+      "title": "Involving Global Management Graduation Program",
+      "description": "Selected as a high-potential talent for Bayer's 3-year global rotation program. Gained multi-functional experience across sales & marketing, R&D, service support, customer excellence, and digital solution business in different regions (2022 - 2024). Drove coordination and synchronous operation of multiple value chains, enhancing global strategic alignment.",
+      "image": "/images/projects/image.png"
+    },
+    {
+      "projectNumber": 2,
+      "title": "Digital Solution business",
+      "description": "leading & steering Chinese digital platform launch team, identify Chinese digital platform roadmap, readiness for the future product implementation; Pave the way for the global digital platforms launching and strategies. invest potential local AI products in China and build collaboration with them based on Bayer's future digital platform.",
+      "image": "/images/projects/image2.png"
+    },
+    {
+      "projectNumber": 3,
+      "title": "AI-Powered Marketing Research",
+      "description": "Launched marketing research and orchestrated marketplace intelligence by utilizing LLM and Generative AI models, leveraging prompt engineering for content generation and RAG/LangChain for knowledge base maximization.",
+      "image": "/images/projects/image.png"
+    },
+    {
+      "projectNumber": 4,
+      "title": "Radimetrics Application & Development",
+      "description": "Responsible for the radiology's digital software, especially the radiation dose management software Radimetrics application & further development in China. Providing consultant & service support for Radimetrics to the customers; orchestrated with global digital solution team's strategies for Chinese software business launching & implementation.",
+      "image": "/images/projects/image2.png"
+    },
+    {
+      "projectNumber": 5,
+      "title": "PV.AI Workflow Initiative & Dataset Building (Primovist AI Project)",
+      "description": "Initiated a collaborative research trial (Phase I in China) with a leading hospital and a 3rd party partner focusing on Primovist-related AI applications. This initiative resulted in 1 pitch publication at ISMRM 2020 and the generation of 4 Bayer IP Assets (10/2018 - 12/2020), demonstrating strong capabilities in evidence generation and innovation.",
+      "image": "/images/projects/image.png"
+    },
+    {
+      "projectNumber": 6,
+      "title": "AI-Driven Clinical Trial Co-creation",
+      "description": "Built AI efficiency solution for Bayer products by leveraging cutting-edge AI technologies (CNN/FACN). Proposed and initiated innovative clinical trials, with publications and presentations at international conferences.",
+      "image": "/images/projects/image2.png"
+    },
+    {
+      "projectNumber": 7,
+      "title": "Global Digital Solution Ecosystem Curation",
+      "description": "Collaborated with 3rd party vendors to curate disease-oriented AI marketplaces, integrating GPT and Meta LLM2/LLM3 into routine marketing business.",
+      "image": "/images/projects/image.png"
+    },
+    {
+      "projectNumber": 8,
+      "title": "DNN Algorithms for Contrast Media Pharmacokinetic Research",
+      "description": "Led an innovative AI project in collaboration with Nanfang Hospital and Guangzhou University of Chinese Medicine to develop Deep Neural Network (DNN) algorithms for pharmacokinetic research of contrast media. Presented findings via 2 posters at Bayer R&D Science Conferences (Amsterdam, 2022), showcasing advanced data analysis and research capabilities.",
+      "image": "/images/projects/image2.png"
+    },
+    {
+      "projectNumber": 9,
+      "title": "Cloud-Based Imaging Service",
+      "description": "Initiated cloud/On-prem based diagnosis imaging service and digital health service for clinical trials, collaborating with Tencent Cloud and Tencent Miying.Inc.",
+      "image": "/images/projects/image.png"
+    },
+    {
+      "projectNumber": 10,
+      "title": "Crossfunctional Platforming capabilities",
+      "description": "Good relationship with Research institues, Universities & Hospitals, IT partners to build business platform/ecosystem: coorperate with NVIDIA Inc, Tencent, some start-ups, etc. to build platform overarchingly eg. NVIDIA MONAI-based Deep Vein Thrombosis diagnosis framework collaborated with Guangzhou Medical University & Hospitals, etc.",
+      "image": "/images/projects/image2.png"
+    },
+    {
+      "projectNumber": 11,
+      "title": "Scientific Differentiation Support",
+      "description": "Drove business figure increases for target clients by initiating scientific differentiation support projects. eg. Leading and developing DNN algorithms for contrast media's pharmacokinetic research -- a products related innovative AI project with Nanfang Hospital, University of Guangzhou Chinese Medicine collaboration, 2 posters on Bayer R&D Science Conferences, Amsterdam, 2022",
+      "image": "/images/projects/image.png"
+    },
+    {
+      "projectNumber": 12,
+      "title": "digital marketing & platform marketing",
+      "description": "Contributed significantly to the [Liver360 project](https://www.liver360.bayer.sg/) for liver cancer disease awareness and medical education promotion in the APAC region (2021), supporting strategic marketing and medical communication objectives.",
+      "image": "/images/projects/image2.png"
+    },
+    {
+      "projectNumber": 13,
+      "title": "Business driven & Commercial Insights",
+      "description": "As sales & application expert drove business figure above 2% MS increase for target clients by initiating scientific differentiation support project in Guangzhou, 2020 - 2021",
+      "image": "/images/projects/image.png"
+    },
+    {
+      "projectNumber": 14,
+      "title": "Preclinical & Post Clinical Research",
+      "description": "Initiated several preclinical & post clinical MR imaging & Contrast media research pilots with 50+ hospitals, generating peer-reviewed publications.",
+      "image": "/images/projects/image2.png"
+    },
+    {
+      "projectNumber": 15,
+      "title": "Digital & scientific tools for product moating",
+      "description": "Build various digital tools and research solutions to create exclusive and customer centralized ecosystem for products",
+      "image": "/images/gihub.gif"
+    }
+  ],
+  "publications": [
+    {
+      "type": "paper",
+      "title": "The diagnostic efficacy of amide proton transfer imaging in grading gliomas and predicting tumor proliferation.",
+      "authors": "Chen Y, Li X, Song Y, Zhu X, Zhao J, Yan X, Wang J, Fan M, Chu J.",
+      "journal": "Neuroreport. 2019 Jan 16;30(2):139-144",
+      "link": "https://journals.lww.com/neuroreport/abstract/2019/01020/the_diagnostic_efficacy_of_amide_proton_transfer.15.aspx"
+    },
+    {
+      "type": "paper",
+      "title": "Association between myocardial extracellular volume and strain analysis through cardiovascular magnetic resonance with histological myocardial fibrosis in patients awaiting heart transplantation.",
+      "authors": "Cui Y, Cao Y, Song J, Dong N, Kong X, Wang J, Yuan Y, Zhu X, Yan X, Greiser A, Shi H, Han P.",
+      "journal": "J Cardiovasc Magn Reson. 2018 Apr 23; 20(1): 25",
+      "link": "https://doi.org/10.1186/s12968-018-0445-z"
+    },
+    {
+      "type": "paper",
+      "title": "Gadolinium-chelate functionalized bismuth nanotheranostic agent for in vivo MRI/CT/PAI imaging-guided photothermal cancer therapy.",
+      "authors": "Wu B, Lu ST, Yu H, Liao RF, Li H, Lucie Zafitatsimo BV, Li YS, Zhang Y, Zhu XL, Liu HG, Xu HB, Huang SW, Cheng Z.",
+      "journal": "Biomaterials. 2018 Mar;159:37-47",
+      "link": "https://doi.org/10.1016/j.biomaterials.2017.12.022"
+    },
+    {
+      "type": "paper",
+      "title": "The diagnostic efficacy of amide proton transfer imaging in grading gliomas and predicting tumor proliferation.",
+      "authors": "Chen Y, Li X, Song Y, Zhu X, Zhao J, Yan X, Wang J, Fan M, Chu J.",
+      "journal": "Neuroreport. 2019 Jan 16;30(2):139-144",
+      "link": "https://journals.lww.com/neuroreport/abstract/2019/01020/the_diagnostic_efficacy_of_amide_proton_transfer.15.aspx"
+    },
+    {
+      "type": "paper",
+      "title": "In Vivo Imaging Markers for Prediction of Radiotherapy Response in Patients with Nasopharyngeal Carcinoma: RESOLVE DWI versus DKI.",
+      "authors": "Huang WY, Li MM, Lin SM, Chen F, Yang K, Zhu XL, Wu G, Li JJ.",
+      "journal": "Sci Rep. 2018 Oct 26;8(1):15861.",
+      "link": "https://doi.org/10.1038/s41598-018-34072-9"
+    },
+    {
+      "type": "paper",
+      "title": "Diffusion-kurtosis imaging predicts early radiotherapy response in nasopharyngeal carcinoma patients",
+      "authors": "Weiyuan Huang, Wu Gang , Meng-meng Li , Feng Chen , Shao-min Lin , Kai Yang , Ying-man Zhao , Xiao-lei Zhu , Jian-Jun Li.",
+      "journal": "Oncotarget 2017 Aug 2;8(38)",
+      "link": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5630398/"
+    },
+    {
+      "type": "paper",
+      "title": "The Diagnostic Value of 3-Dimensional Sampling Perfection With Application Optimized Contrasts Using Different Flip Angle Evolutions (SPACE) MRI in Evaluating Lower Extremity Deep Venous Thrombus. ",
+      "authors": "Wu G, Xie R, Zhang X, Morelli J, Yan X, Zhu X, Li X.",
+      "journal": "Invest Radiol. 2017 Jul 12",
+      "link": "https://doi.org/10.1097/RLI.0000000000000399"
+    },
+    {
+      "type": "paper",
+      "title": "Evaluation of Regional Variability and Measurement Reproducibility of Intravoxel Incoherent Motion Diffusion Weighted Imaging Using a Cardiac Stationary Phase Based ECG Trigger Method.",
+      "authors": "Xiang Z, Ai Z, Liang J, Li G, Zhu X, Yan X.",
+      "journal": "Biomed Res Int. 2018 Apr 17;2018:4604218",
+      "link": "https://doi.org/10.1155/2018/4604218"
+    },
+    {
+      "type": "paper",
+      "title": "The capability of inflow inversion recovery magnetic resonance compared to contrast-enhanced magnetic resonance in renal artery angiography. ",
+      "authors": "Xu X, Lin X, Huang J, Pan Z, Zhu X, Chen K, Zee CS, Yan F.",
+      "journal": "Biomed Res Int. 2018 Apr 17;2018:4604218",
+      "link": "https://doi.org/10.1007/s00261-017-1161-0"
+    },
+    {
+      "type": "paper",
+      "title": "Composition of phosphorus in wetland soils determined by SMT and solution 31P-NMR analyses.",
+      "authors": "Zhang W, Jin X, Ding Y, Zhu X, Rong N, Li J, S.",
+      "journal": "Environ Sci Pollut Res Int. 2016 May;23(9):9046-53",
+      "link": "https://doi.org/10.1007/s00261-017-1161-0"
+    },
+    {
+      "type": "paper",
+      "title": "Body temperature sensitive micelles for MRI enhancement.",
+      "authors": "Zhu X, Chen S, Luo Q, Ye C, Liu M, Zhou X.",
+      "journal": "Chem Commun (Camb).2015 Jun 4;51(44):9085-8.",
+      "link": "https://doi.org/10.1002/anie.201007105"
+    }
+  ],
+  "patents": [
+    {
+      "title": "CHINESE PATENT: 201510063559.3",
+      "authors": "Zhou Xin; Zhu Xiaolei; Chen Shizhen; Sun Xianping; Liu Maili;",
+      "link": "https://patents.google.com/patent/CN104623697A/en"
+    }
+  ],
+  "certificates": [
+    {
+      "title": "Member",
+      "organization": "International Society for Magnetic Resonance in Medicine",
+      "date": "2017-2020"
+    },
+    {
+      "title": "Fellow",
+      "organization": "Chinese Society of Imaging Technology",
+      "date": "2017-2020"
+    }
+  ],
+  "posters": [
+    {
+      "title": "Shortening the Waiting Time for Primovist: Hepatobiliary Phase Enhancement Using Deep Learning Methods.",
+      "authors": "Shujuan Li, Lixin Wang, Wei Yu, Xiaolei Zhu, Jingliang Cheng, Tianyi Qian.",
+      "event": "Power ISMRM 2020"
+    },
+    {
+      "title": "Effectiveness of fatty fraction by high-speed T2-corrected multi-echo SVS (HISTO) and multiecho 3D DIXON (mDIXON) in rapid and robust acquisition for Duchenne Muscular Dystrophy.",
+      "authors": "Xiaolei Zhu, Guijin Li, Zhiyong Li.",
+      "event": "Proc. Intl. Soc. Mag. Reson. Med. 26 (2018): 3910"
+    },
+    {
+      "title": "A cardiac stationary phase based ECG trigger(CaspECG) of Intravoxel incoherent motion diffusion MR in left liver lobe.",
+      "authors": "Zhiming Xiang, Zhu Ai, Guijin Li, Xiaolei Zhu, Xu Yan.",
+      "event": "Proc. Intl. Soc. Mag. Reson. Med. 25 (2017): 5808"
+    },
+    {
+      "title": "Magnetization transfer MRI for evaluating bowel fibrosis and inflammation in patients with stricturing Crohn's disease.",
+      "authors": "Xuehua Li, Siyun Huang, Mengchen Zhang, Siting Feng, Xiaolei Zhu, Xu Yan, Ziping Li.",
+      "event": "Proc. Intl. Soc. Mag. Reson. Med. 25 (2017): 4490"
+    },
+    {
+      "title": "Prediction of Radiotherapy Response in Nasopharyngeal Carcinoma Patients Using Diffusion-Kurtosis Imaging.",
+      "authors": "Weiyuan Huang, Jiianjun Li, Feng Chen, Yingman Zhao, and Xiaolei Zhu.",
+      "event": "Proc. Intl. Soc. Mag. Reson. Med. 25 (2017): 1828"
+    },
+    {
+      "title": "The Combine Analysis of improved Multi-parametric MR for identifying the different subtypes and immunohistochemical expression of Breast cancer.",
+      "authors": "Weixiong Fan, Xiaofeng Chen, Fengyan Cheng, Yabao Cheng, Tai Xu, Guijin Li, Xiaolei Zhu, and Shuai Li.",
+      "event": "Proc. Intl. Soc. Mag. Reson. Med. 25 (2017): 5394"
+    },
+    {
+      "title": "The Diagnostic Value of Sampling Perfection Application with Contrast Optimized Using Variable Flip Angle Evolutions (SPACE MR) in Evaluating Lower Extremity Deep Venous Thrombus.",
+      "authors": "Gang Wu, Xu Yan, Xiaolei Zhu, Tianjing Zhang.",
+      "event": "Proc. Intl. Soc. Mag. Reson. Med. 25 (2017): 2817"
+    }
+  ]
+}
