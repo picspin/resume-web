@@ -35,9 +35,8 @@
 
 **功能：**
 - 测试和构建
-- 浏览器兼容性测试
 - 预览部署 (Pull Request)
-- 生产环境部署
+- 生产环境部署到GitHub Pages
 - 安全扫描
 - 通知
 
@@ -48,17 +47,14 @@
 2. 找到 "Pages" 选项
 3. 选择 "GitHub Actions" 作为部署源
 
-### 2. 配置Secrets (可选)
-如果需要使用Vercel部署，需要在仓库设置中添加以下Secrets：
-- `VERCEL_TOKEN`
-- `VERCEL_ORG_ID`
-- `VERCEL_PROJECT_ID`
-
-### 3. 权限设置
+### 2. 权限设置
 确保仓库有适当的权限来运行GitHub Actions：
 - 进入仓库设置
 - 找到 "Actions" → "General"
 - 确保 "Actions permissions" 设置为 "Allow all actions and reusable workflows"
+
+### 3. 环境设置
+工作流会自动创建 `github-pages` 环境，无需手动配置。
 
 ## 使用建议
 
@@ -72,6 +68,10 @@
 ### 手动触发
 可以在GitHub仓库的 "Actions" 标签页手动触发任何工作流。
 
+### 部署URL
+成功部署后，你的简历网站将可以通过以下URL访问：
+- `https://cher2bb.github.io/resume-web/`
+
 ## 故障排除
 
 ### 常见问题
@@ -82,12 +82,21 @@
 
 2. **部署失败**
    - 检查GitHub Pages设置
-   - 确认构建产物路径正确
+   - 确认构建产物路径正确 (`dist/`)
    - 查看权限设置
 
 3. **安全扫描失败**
    - 运行 `npm audit fix` 修复漏洞
    - 更新有安全问题的依赖
 
+4. **工作流不运行**
+   - 检查Actions权限设置
+   - 确认工作流文件在正确路径
+   - 验证YAML语法
+
 ### 日志查看
-在GitHub仓库的 "Actions" 标签页可以查看详细的工作流日志和错误信息。 
+在GitHub仓库的 "Actions" 标签页可以查看详细的工作流日志和错误信息。
+
+### 构建产物
+- 构建产物会保存在 `dist/` 目录
+- 可以通过Actions页面下载构建产物进行调试 
