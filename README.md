@@ -37,4 +37,4 @@ A modern, responsive resume website built with React, Vite, and Tailwind CSS v4.
    npm run build
    ```
 
-## Project Structure 
+## Project Structure # GitHub Actions Test
