@@ -1,6 +1,6 @@
 import { Sun, Moon, Download, Globe } from 'lucide-react'
 
-export default function Header({ lang, setLang, dark, setDark, onDownload }) {
+export default function Header({ lang, setLang, dark, setDark, onDownload, versions = [], selectedVersion, setSelectedVersion }) {
   return (
     <div className="flex justify-between items-center mb-8">
       <div className="flex items-center space-x-2">
@@ -29,6 +29,21 @@ export default function Header({ lang, setLang, dark, setDark, onDownload }) {
       </div>
       
       <div className="flex items-center space-x-2">
+        {versions.length > 0 && (
+          <select
+            className="btn-secondary max-w-48"
+            value={selectedVersion}
+            onChange={(event) => setSelectedVersion(event.target.value)}
+            title={lang === 'en' ? 'Resume version' : '简历版本'}
+          >
+            <option value="default">{lang === 'en' ? 'Default' : '默认'}</option>
+            {versions.map((version) => (
+              <option key={version.slug} value={version.slug}>
+                {version.label}
+              </option>
+            ))}
+          </select>
+        )}
         <button 
           className="btn-secondary"
           onClick={onDownload}

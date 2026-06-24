@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
-import { Sun, Moon, Download, Globe, Mail, Phone, MapPin } from 'lucide-react'
 import resumeEn from './data/resume-en.json'
 import resumeZh from './data/resume-zh.json'
+import resumeVersions from './data/resume-versions.json'
 import ResumeSection from './components/ResumeSection'
 import Header from './components/Header'
 import ContactInfo from './components/ContactInfo'
@@ -9,6 +9,7 @@ import './App.css'
 
 function App() {
   const [lang, setLang] = useState('en')
+  const [selectedVersion, setSelectedVersion] = useState('default')
   const [dark, setDark] = useState(() => {
     const saved = localStorage.getItem('darkMode')
     return saved ? JSON.parse(saved) : window.matchMedia('(prefers-color-scheme: dark)').matches
@@ -23,9 +24,18 @@ function App() {
     }
   }, [dark])
 
-  const data = lang === 'en' ? resumeEn : resumeZh
+  const version = resumeVersions.find((item) => item.slug === selectedVersion)
+  const data = version?.resume || (lang === 'en' ? resumeEn : resumeZh)
 
   const handleDownload = () => {
+    if (version?.pdfPath) {
+      const link = document.createElement('a')
+      link.href = version.pdfPath
+      link.download = `${version.slug}.pdf`
+      link.click()
+      return
+    }
+
     const link = document.createElement('a')
     link.href = '/resume-xiaolei-zhu.pdf'
     link.download = `Xiaolei_Zhu_Resume_${lang.toUpperCase()}.pdf`
@@ -54,6 +64,9 @@ function App() {
           dark={dark} 
           setDark={setDark}
           onDownload={handleDownload}
+          versions={resumeVersions}
+          selectedVersion={selectedVersion}
+          setSelectedVersion={setSelectedVersion}
         />
 
         {/* Profile Section */}

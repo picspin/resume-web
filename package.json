@@ -8,6 +8,7 @@
     "build": "vite build",
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
+    "resume:manifest": "node scripts/resume-ops/generate-manifest.mjs",
     "resume:test": "node --test scripts/resume-ops/__tests__/*.test.mjs",
     "resume:sync": "node scripts/resume-ops/sync-master.mjs",
     "resume:adapt": "node scripts/resume-ops/adapt-resume.mjs",
