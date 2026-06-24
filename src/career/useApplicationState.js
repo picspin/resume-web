@@ -1,12 +1,18 @@
 import { useCallback, useEffect, useState } from 'react';
-import { readApplicationState, updateApplicationRecord, writeApplicationState } from './applicationState.js';
+import {
+  readApplicationState,
+  resolveApplicationStorage,
+  updateApplicationRecord,
+  writeApplicationState,
+} from './applicationState.js';
 
-export function useApplicationState(storage = window.localStorage) {
-  const [applicationState, setApplicationState] = useState(() => readApplicationState(storage));
+export function useApplicationState(storage) {
+  const resolvedStorage = resolveApplicationStorage(storage);
+  const [applicationState, setApplicationState] = useState(() => readApplicationState(resolvedStorage));
 
   useEffect(() => {
-    writeApplicationState(storage, applicationState);
-  }, [applicationState, storage]);
+    writeApplicationState(resolvedStorage, applicationState);
+  }, [applicationState, resolvedStorage]);
 
   const updateRecord = useCallback((slug, patch) => {
     setApplicationState((current) => updateApplicationRecord(current, slug, patch));

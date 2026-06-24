@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {
   CAREER_STORAGE_KEY,
   readApplicationState,
+  resolveApplicationStorage,
   updateApplicationRecord,
   writeApplicationState,
 } from '../applicationState.js';
@@ -27,6 +28,39 @@ test('writes and reads application state', () => {
   const storage = memoryStorage();
   writeApplicationState(storage, { role: { status: 'reviewing' } });
   assert.deepEqual(readApplicationState(storage), { role: { status: 'reviewing' } });
+});
+
+test('ignores storage write failures', () => {
+  const storage = {
+    getItem: () => null,
+    setItem: () => {
+      throw new Error('quota exceeded');
+    },
+  };
+
+  assert.doesNotThrow(() => writeApplicationState(storage, { role: { status: 'reviewing' } }));
+});
+
+test('falls back safely when localStorage access throws', () => {
+  const originalWindow = globalThis.window;
+  globalThis.window = {};
+
+  Object.defineProperty(globalThis.window, 'localStorage', {
+    configurable: true,
+    get: () => {
+      throw new Error('blocked');
+    },
+  });
+
+  try {
+    assert.equal(resolveApplicationStorage(), null);
+  } finally {
+    if (originalWindow === undefined) {
+      Reflect.deleteProperty(globalThis, 'window');
+    } else {
+      globalThis.window = originalWindow;
+    }
+  }
 });
 
 test('updates one slug with default status and timestamp', () => {
