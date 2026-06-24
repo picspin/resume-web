@@ -38,3 +38,7 @@ A modern, responsive resume website built with React, Vite, and Tailwind CSS v4.
    ```
 
 ## Project Structure # GitHub Actions Test
+
+## Medical Resume-Ops
+
+This project includes a local `career/` workspace for JD-specific medical/pharma resume adaptation and PDF generation. See `career/README.md` for commands.
