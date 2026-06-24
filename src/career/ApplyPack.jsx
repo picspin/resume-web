@@ -27,13 +27,30 @@ export default function ApplyPack({ version, onUpdate }) {
         </label>
       </div>
       <div className="mt-4 grid grid-cols-1 gap-3">
-        <textarea className="min-h-24 w-full rounded-md border border-gray-300 p-3 text-sm" readOnly value={draft.hrMessage} />
-        <textarea
-          className="min-h-24 w-full rounded-md border border-gray-300 p-3 text-sm"
-          readOnly
-          value={draft.linkedInMessage}
-        />
-        <textarea className="min-h-36 w-full rounded-md border border-gray-300 p-3 text-sm" readOnly value={draft.emailBody} />
+        <label className="block">
+          <span className="text-xs font-medium uppercase tracking-wide text-gray-500">HR message draft</span>
+          <textarea
+            className="mt-1 min-h-24 w-full rounded-md border border-gray-300 p-3 text-sm"
+            readOnly
+            value={draft.hrMessage}
+          />
+        </label>
+        <label className="block">
+          <span className="text-xs font-medium uppercase tracking-wide text-gray-500">LinkedIn message draft</span>
+          <textarea
+            className="mt-1 min-h-24 w-full rounded-md border border-gray-300 p-3 text-sm"
+            readOnly
+            value={draft.linkedInMessage}
+          />
+        </label>
+        <label className="block">
+          <span className="text-xs font-medium uppercase tracking-wide text-gray-500">Email body draft</span>
+          <textarea
+            className="mt-1 min-h-36 w-full rounded-md border border-gray-300 p-3 text-sm"
+            readOnly
+            value={draft.emailBody}
+          />
+        </label>
       </div>
     </section>
   )

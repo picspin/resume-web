@@ -1,4 +1,4 @@
-const STATUSES = ['generated', 'reviewing', 'ready_to_apply', 'applied', 'follow_up', 'closed']
+const STATUSES = ['jd_captured', 'generated', 'reviewing', 'ready_to_apply', 'applied', 'follow_up', 'closed']
 
 export default function ApplicationBoard({ rows, selectedSlug, onSelect, onUpdate }) {
   return (
@@ -14,18 +14,21 @@ export default function ApplicationBoard({ rows, selectedSlug, onSelect, onUpdat
               <p className="mt-1 text-sm text-gray-600">{row.archetype}</p>
               <p className="mt-2 text-xs text-gray-500">{row.nextAction}</p>
             </button>
-            <div className="mt-3 flex items-center gap-2">
-              <select
-                className="rounded-md border border-gray-300 px-2 py-1 text-sm"
-                value={row.status}
-                onChange={(event) => onUpdate(row.slug, { status: event.target.value })}
-              >
-                {STATUSES.map((status) => (
-                  <option key={status} value={status}>
-                    {status}
-                  </option>
-                ))}
-              </select>
+            <div className="mt-3 flex flex-wrap items-end gap-3">
+              <label className="flex items-center gap-2">
+                <span className="text-xs font-medium uppercase tracking-wide text-gray-500">Status</span>
+                <select
+                  className="rounded-md border border-gray-300 px-2 py-1 text-sm"
+                  value={row.status}
+                  onChange={(event) => onUpdate(row.slug, { status: event.target.value })}
+                >
+                  {STATUSES.map((status) => (
+                    <option key={status} value={status}>
+                      {status}
+                    </option>
+                  ))}
+                </select>
+              </label>
               {row.pdfPath ? (
                 <a className="text-sm text-teal-700 hover:underline" href={row.pdfPath}>
                   PDF
