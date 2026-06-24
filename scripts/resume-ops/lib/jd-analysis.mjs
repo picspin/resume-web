@@ -17,15 +17,42 @@ export function normalizeText(value) {
   return String(value || '').toLowerCase().replace(/\s+/g, ' ').trim();
 }
 
+function phraseTokens(phrase) {
+  return normalizeText(phrase).match(/[a-z0-9]+/g) || [];
+}
+
+function escapeRegExp(value) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+export function matchesPhrase(text, phrase) {
+  const tokens = phraseTokens(phrase);
+  if (tokens.length === 0) {
+    return false;
+  }
+
+  const pattern = tokens.map(escapeRegExp).join('[^a-z0-9]+');
+  return new RegExp(`(^|[^a-z0-9])${pattern}($|[^a-z0-9])`, 'i').test(String(text || ''));
+}
+
+function scoreSignal(jdText, titleText, signal) {
+  if (!matchesPhrase(jdText, signal)) {
+    return 0;
+  }
+
+  return matchesPhrase(titleText, signal) ? 4 : 1;
+}
+
 export function detectArchetypes(jdText) {
+  const titleText = inferRoleLabel(jdText);
   const normalized = normalizeText(jdText);
   return MEDICAL_ARCHETYPES
     .map((archetype) => {
-      const matchedSignals = archetype.signals.filter((signal) => normalized.includes(signal.toLowerCase()));
+      const matchedSignals = archetype.signals.filter((signal) => matchesPhrase(normalized, signal));
       return {
         id: archetype.id,
         label: archetype.label,
-        score: matchedSignals.length,
+        score: matchedSignals.reduce((sum, signal) => sum + scoreSignal(normalized, titleText, signal), 0),
         matchedSignals,
       };
     })
@@ -42,7 +69,7 @@ export function extractKeywords(jdText, limit = 12) {
     if (EXCLUDED_KEYWORDS.has(normalizedPhrase)) {
       continue;
     }
-    if (normalized.includes(normalizedPhrase) && !keywords.includes(normalizedPhrase)) {
+    if (matchesPhrase(normalized, normalizedPhrase) && !keywords.includes(normalizedPhrase)) {
       keywords.push(normalizedPhrase);
     }
   }

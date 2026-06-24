@@ -15,24 +15,24 @@ function list(items) {
 }
 
 function renderExperience(work = []) {
-  return work.slice(0, 6).map((job) => `
-    <div class="item">
-      <div class="item-head"><span>${escapeHtml(job.title)} - ${escapeHtml(job.company)}</span><span class="muted">${escapeHtml(job.date)}</span></div>
-      ${list(job.details || [])}
-    </div>
-  `).join('');
+  return work.slice(0, 6).map((job) => [
+    '<div class="item">',
+    `<div class="item-head"><span>${escapeHtml(job.title)} - ${escapeHtml(job.company)}</span><span class="muted">${escapeHtml(job.date)}</span></div>`,
+    list(job.details || []),
+    '</div>',
+  ].join('\n')).join('\n');
 }
 
 function renderProjects(projects = []) {
-  return projects.slice(0, 5).map((project) => `
-    <div class="item">
-      <div class="item-head"><span>${escapeHtml(project.title)}</span></div>
-      <p>${escapeHtml(project.description || '')}</p>
-    </div>
-  `).join('');
+  return projects.slice(0, 5).map((project) => [
+    '<div class="item">',
+    `<div class="item-head"><span>${escapeHtml(project.title)}</span></div>`,
+    `<p>${escapeHtml(project.description || '')}</p>`,
+    '</div>',
+  ].join('\n')).join('\n');
 }
 
-export function renderPrintHtml({ resume, metadata, template }) {
+export function renderPrintHtml({ resume, metadata, template, includeTruthNotes = false }) {
   const contact = [
     resume.general?.address,
     resume.general?.email_private || resume.general?.email_work,
@@ -40,14 +40,19 @@ export function renderPrintHtml({ resume, metadata, template }) {
     resume.general?.github,
   ].filter(Boolean).map(escapeHtml).join('<span>|</span>');
 
-  const body = [
+  const sections = [
     section('Professional Summary', `<p>${escapeHtml(resume.summary)}</p>`),
     section('Core Competencies', `<div class="tags">${(resume.targetedKeywords || []).slice(0, 10).map((item) => `<span class="tag">${escapeHtml(item)}</span>`).join('')}</div>`),
     section('Work Experience', renderExperience(resume.work)),
     section('Selected Projects', renderProjects(resume.projects)),
     section('Education', renderProjects((resume.education || []).map((edu) => ({ title: `${edu.degree} - ${edu.institution}`, description: `${edu.major || ''} ${edu.date || ''}` })))),
-    section('Truth Notes', list(metadata.truthWarnings || [])),
-  ].join('\n');
+  ];
+
+  if (includeTruthNotes) {
+    sections.push(section('Truth Notes', list(metadata.truthWarnings || [])));
+  }
+
+  const body = sections.join('\n');
 
   return template
     .replaceAll('{{LANG}}', resume.language || 'en')

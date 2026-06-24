@@ -1,8 +1,8 @@
 export const MEDICAL_ARCHETYPES = [
   {
     id: 'medical-digital-product-marketing',
-    label: 'Medical Digital Product Marketing',
-    signals: ['product marketing', 'value proposition', 'pricing', 'launch', 'sales collateral', 'portfolio', 'market analysis'],
+    label: 'Medical Digital Product Strategy / Marketing',
+    signals: ['medical digital', 'medical digital solutions', 'digital innovation', 'product strategy', 'product marketing', 'value proposition', 'pricing', 'launch', 'sales collateral', 'portfolio', 'market analysis', 'stakeholder adoption', 'ai-enabled healthcare'],
   },
   {
     id: 'medical-ai-clinical-workflow',
@@ -12,7 +12,7 @@ export const MEDICAL_ARCHETYPES = [
   {
     id: 'healthcare-digital-transformation',
     label: 'Healthcare Digital Transformation',
-    signals: ['digital transformation', 'change management', 'adoption', 'enablement', 'cloud', 'data platform', 'operating model'],
+    signals: ['healthcare digital', 'digital health', 'digital transformation', 'change management', 'adoption', 'enablement', 'cloud', 'data platform', 'operating model'],
   },
   {
     id: 'medical-device-portfolio-strategy',

@@ -37,7 +37,7 @@ export async function main(argv = process.argv.slice(2)) {
 
   await writeJson(join(outDir, 'resume.json'), resume);
   await writeJson(join(outDir, 'metadata.json'), metadata);
-  await writeFile(join(outDir, 'evaluation.md'), renderEvaluation({ jdAnalysis, metadata }), 'utf8');
+  await writeFile(join(outDir, 'evaluation.md'), renderEvaluation({ jdAnalysis, metadata, resume }), 'utf8');
 
   console.log(`Generated career/versions/${slug}`);
 }

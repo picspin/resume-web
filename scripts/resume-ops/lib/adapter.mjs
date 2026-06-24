@@ -1,6 +1,7 @@
+import { matchesPhrase } from './jd-analysis.mjs';
+
 function scoreText(text, keywords) {
-  const normalized = String(text || '').toLowerCase();
-  return keywords.reduce((score, keyword) => score + (normalized.includes(String(keyword).toLowerCase()) ? 1 : 0), 0);
+  return keywords.reduce((score, keyword) => score + (matchesPhrase(text, keyword) ? 1 : 0), 0);
 }
 
 function rankItems(items, keywords, getText) {

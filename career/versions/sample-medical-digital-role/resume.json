@@ -7,7 +7,7 @@
     "email_private": "zxl1412@gmail.com",
     "tel": "+49 15203046915 (DE); +86 18607106505 (CN)"
   },
-  "summary": "Dynamic Application Manager with 10 years of experience in medical imaging, digital healthcare solutions, and data-driven innovation, possessing deep healthcare insights and a wealth of academic achievements. Adept at driving innovation and operational excellence in medical imaging solutions, with expertise in product strategy and project management, successfully implementing complex projects and enhancing product portfolio performance in the Chinese market. Skilled in analytical thinking to develop new business opportunities that meet market demands. Experienced in cross-functional collaboration, leading teams to deliver high-impact clinical applications and solutions. Committed to advancing the healthcare industry through effective communication and customer-centric services. Target framing for Clinical Modeling, RWD / RWE, and Trial Analytics: emphasizes medical ai, product marketing, adoption, enablement, competitive landscape through existing medical imaging, healthcare digitalization, AI/ML, and China/APAC implementation evidence.",
+  "summary": "Dynamic Application Manager with 10 years of experience in medical imaging, digital healthcare solutions, and data-driven innovation, possessing deep healthcare insights and a wealth of academic achievements. Adept at driving innovation and operational excellence in medical imaging solutions, with expertise in product strategy and project management, successfully implementing complex projects and enhancing product portfolio performance in the Chinese market. Skilled in analytical thinking to develop new business opportunities that meet market demands. Experienced in cross-functional collaboration, leading teams to deliver high-impact clinical applications and solutions. Committed to advancing the healthcare industry through effective communication and customer-centric services. Target framing for Medical Digital Product Strategy / Marketing: emphasizes medical ai, medical digital, medical digital solutions, digital innovation, product strategy through existing medical imaging, healthcare digitalization, AI/ML, and China/APAC implementation evidence.",
   "education": [
     {
       "degree": "PhD",
@@ -37,28 +37,6 @@
       ]
     },
     {
-      "title": "Radiology Solution Marketing Associate Manager",
-      "company": "Bayer AG - Global Radiology",
-      "date": "August 2022 – February 2023",
-      "location": "Berlin, Germany",
-      "details": [
-        "Drove agile and Scrum operations to optimize global multi-product line imaging workflows (including liver, prostate, etc.).",
-        "Coordinated with regional teams across 21 countries to promote the IAWS pilot project, integrating software, medical devices, and pharmaceuticals to improve operational efficiency and product synergy.",
-        "Led the A-map clinical project for liver cancer, aligning the product roadmap with the needs of the APAC and China markets."
-      ]
-    },
-    {
-      "title": "Scientific Specialist",
-      "company": "Siemens Healthineers",
-      "date": "September 2015 – December 2017",
-      "location": "Guangzhou, China",
-      "details": [
-        "Collaborated with cross-functional teams to advance translational medicine research from clinical trials to market promotion.",
-        "Managed scientific marketing projects, provided technical support, and drove new product development.",
-        "Led the implementation of the China WIP project, promoting MRI technology and scientific research advancement."
-      ]
-    },
-    {
       "title": "Senior Application Manager",
       "company": "Bayer Healthcare China",
       "date": "May 2024 – Present",
@@ -67,6 +45,17 @@
         "Spearheaded clinical development for Bayer's radiology products, creating disease-based integrated solutions to drive business growth.",
         "Developed innovative business models to provide comprehensive clinical application and scientific services to clients.",
         "Integrated resources to develop clinical digital tools like ROICalc and Thermostat, enhancing client business performance, and created an AI-powered training chatbot using RAG to improve internal communication efficiency."
+      ]
+    },
+    {
+      "title": "Radiology Solution Marketing Associate Manager",
+      "company": "Bayer AG - Global Radiology",
+      "date": "August 2022 – February 2023",
+      "location": "Berlin, Germany",
+      "details": [
+        "Drove agile and Scrum operations to optimize global multi-product line imaging workflows (including liver, prostate, etc.).",
+        "Coordinated with regional teams across 21 countries to promote the IAWS pilot project, integrating software, medical devices, and pharmaceuticals to improve operational efficiency and product synergy.",
+        "Led the A-map clinical project for liver cancer, aligning the product roadmap with the needs of the APAC and China markets."
       ]
     },
     {
@@ -101,6 +90,17 @@
       ]
     },
     {
+      "title": "Scientific Specialist",
+      "company": "Siemens Healthineers",
+      "date": "September 2015 – December 2017",
+      "location": "Guangzhou, China",
+      "details": [
+        "Collaborated with cross-functional teams to advance translational medicine research from clinical trials to market promotion.",
+        "Managed scientific marketing projects, provided technical support, and drove new product development.",
+        "Led the implementation of the China WIP project, promoting MRI technology and scientific research advancement."
+      ]
+    },
+    {
       "title": "Assistant Lecturer",
       "company": "Hubei Polytechnic University",
       "date": "August 2010 – September 2011",
@@ -119,16 +119,16 @@
   ],
   "projects": [
     {
+      "projectNumber": 9,
+      "title": "Cloud-Based Imaging Service",
+      "description": "Initiated cloud/On-prem based diagnosis imaging service and digital health service for clinical trials, collaborating with Tencent Cloud and Tencent Miying.Inc.",
+      "image": "/images/projects/image.png"
+    },
+    {
       "projectNumber": 1,
       "title": "Involving Global Management Graduation Program",
       "description": "Selected as a high-potential talent for Bayer's 3-year global rotation program. Gained multi-functional experience across sales & marketing, R&D, service support, customer excellence, and digital solution business in different regions (2022 - 2024). Drove coordination and synchronous operation of multiple value chains, enhancing global strategic alignment.",
       "image": "/images/projects/image.png"
-    },
-    {
-      "projectNumber": 10,
-      "title": "Crossfunctional Platforming capabilities",
-      "description": "Good relationship with Research institues, Universities & Hospitals, IT partners to build business platform/ecosystem: coorperate with NVIDIA Inc, Tencent, some start-ups, etc. to build platform overarchingly eg. NVIDIA MONAI-based Deep Vein Thrombosis diagnosis framework collaborated with Guangzhou Medical University & Hospitals, etc.",
-      "image": "/images/projects/image2.png"
     },
     {
       "projectNumber": 2,
@@ -293,16 +293,16 @@
   "targetedRole": "Sample JD: Medical Digital Innovation and Product Strategy Lead",
   "targetedKeywords": [
     "medical ai",
+    "medical digital",
+    "medical digital solutions",
+    "digital innovation",
+    "product strategy",
     "product marketing",
+    "stakeholder adoption",
+    "ai-enabled healthcare",
+    "healthcare digital",
+    "digital health",
     "adoption",
-    "enablement",
-    "competitive landscape",
-    "business case",
-    "business development",
-    "cro",
-    "rwd",
-    "rwe",
-    "medical affairs",
-    "access"
+    "enablement"
   ]
 }

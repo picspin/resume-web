@@ -26,6 +26,7 @@ function App() {
 
   const version = resumeVersions.find((item) => item.slug === selectedVersion)
   const data = version?.resume || (lang === 'en' ? resumeEn : resumeZh)
+  const displayLang = version?.resume?.language || lang
 
   const handleDownload = () => {
     if (version?.pdfPath) {
@@ -67,6 +68,7 @@ function App() {
           versions={resumeVersions}
           selectedVersion={selectedVersion}
           setSelectedVersion={setSelectedVersion}
+          languageDisabled={Boolean(version)}
         />
 
         {/* Profile Section */}
@@ -83,7 +85,7 @@ function App() {
             {data.general.name}
           </h1>
           <p className="text-xl text-gray-600 dark:text-gray-300 text-center mb-4">
-            {lang === 'en' ? 'Application Manager' : '应用经理'} | Guangzhou, China
+            {displayLang === 'en' ? 'Application Manager' : '应用经理'} | Guangzhou, China
           </p>
           
           {/* Contact Info Cards */}

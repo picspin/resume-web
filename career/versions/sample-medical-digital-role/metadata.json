@@ -2,21 +2,37 @@
   "roleLabel": "Sample JD: Medical Digital Innovation and Product Strategy Lead",
   "archetypes": [
     {
+      "id": "medical-digital-product-marketing",
+      "label": "Medical Digital Product Strategy / Marketing",
+      "score": 16,
+      "matchedSignals": [
+        "medical digital",
+        "medical digital solutions",
+        "digital innovation",
+        "product strategy",
+        "product marketing",
+        "stakeholder adoption",
+        "ai-enabled healthcare"
+      ]
+    },
+    {
+      "id": "healthcare-digital-transformation",
+      "label": "Healthcare Digital Transformation",
+      "score": 4,
+      "matchedSignals": [
+        "healthcare digital",
+        "digital health",
+        "adoption",
+        "enablement"
+      ]
+    },
+    {
       "id": "clinical-modeling-rwd-analytics",
       "label": "Clinical Modeling, RWD / RWE, and Trial Analytics",
       "score": 2,
       "matchedSignals": [
         "rwd",
         "rwe"
-      ]
-    },
-    {
-      "id": "healthcare-digital-transformation",
-      "label": "Healthcare Digital Transformation",
-      "score": 2,
-      "matchedSignals": [
-        "adoption",
-        "enablement"
       ]
     },
     {
@@ -29,23 +45,6 @@
       ]
     },
     {
-      "id": "medical-device-portfolio-strategy",
-      "label": "Medical Device Portfolio / Product Strategy",
-      "score": 2,
-      "matchedSignals": [
-        "competitive landscape",
-        "business case"
-      ]
-    },
-    {
-      "id": "clinical-application-scientific-solution",
-      "label": "Clinical Application / Scientific Solution Lead",
-      "score": 1,
-      "matchedSignals": [
-        "kol"
-      ]
-    },
-    {
       "id": "medical-bd-ecosystem-partnership",
       "label": "Medical BD / Ecosystem Partnership",
       "score": 1,
@@ -54,41 +53,33 @@
       ]
     },
     {
-      "id": "medical-digital-product-marketing",
-      "label": "Medical Digital Product Marketing",
+      "id": "medical-device-portfolio-strategy",
+      "label": "Medical Device Portfolio / Product Strategy",
       "score": 1,
       "matchedSignals": [
-        "product marketing"
-      ]
-    },
-    {
-      "id": "pharma-clinical-development-operations",
-      "label": "Pharma Clinical Development / Operations Innovation",
-      "score": 1,
-      "matchedSignals": [
-        "cro"
+        "competitive landscape"
       ]
     }
   ],
   "keywords": [
     "medical ai",
+    "medical digital",
+    "medical digital solutions",
+    "digital innovation",
+    "product strategy",
     "product marketing",
+    "stakeholder adoption",
+    "ai-enabled healthcare",
+    "healthcare digital",
+    "digital health",
     "adoption",
-    "enablement",
-    "competitive landscape",
-    "business case",
-    "business development",
-    "cro",
-    "rwd",
-    "rwe",
-    "medical affairs",
-    "access"
+    "enablement"
   ],
-  "generatedAt": "2026-06-24T02:41:58.421Z",
+  "generatedAt": "2026-06-24T03:40:53.010Z",
   "rewritePolicy": "truth-based-reorder-and-reframe",
   "selectedProjects": [
+    "Cloud-Based Imaging Service",
     "Involving Global Management Graduation Program",
-    "Crossfunctional Platforming capabilities",
     "Digital Solution business",
     "AI-Powered Marketing Research",
     "Radimetrics Application & Development",
@@ -102,6 +93,6 @@
   "pdf": {
     "careerPath": "career/output/cv-sample-medical-digital-role-2026-06-24.pdf",
     "publicPath": "/generated-resumes/cv-sample-medical-digital-role-2026-06-24.pdf",
-    "generatedAt": "2026-06-24T02:55:13.039Z"
+    "generatedAt": "2026-06-24T03:44:20.615Z"
   }
 }
