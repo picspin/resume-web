@@ -8,17 +8,35 @@ import EvidenceReview from './EvidenceReview'
 import ApplyPack from './ApplyPack'
 import JdIntakeHelper from './JdIntakeHelper'
 
+export async function loadCareerConsoleState(loadVersions = loadCareerVersions) {
+  try {
+    return {
+      careerVersions: await loadVersions(),
+      loadError: '',
+      loading: false,
+    }
+  } catch (error) {
+    return {
+      careerVersions: [],
+      loadError: 'Unable to load local career versions. Review the intake helper and try regenerating the local data.',
+      loading: false,
+    }
+  }
+}
+
 export default function CareerConsole() {
   const { applicationState, updateRecord } = useApplicationState()
   const [careerVersions, setCareerVersions] = useState([])
+  const [loadError, setLoadError] = useState('')
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     let active = true
-    loadCareerVersions().then((versions) => {
+    loadCareerConsoleState().then(({ careerVersions: nextVersions, loadError: nextLoadError, loading: nextLoading }) => {
       if (active) {
-        setCareerVersions(versions)
-        setLoading(false)
+        setCareerVersions(nextVersions)
+        setLoadError(nextLoadError)
+        setLoading(nextLoading)
       }
     })
     return () => {
@@ -76,8 +94,17 @@ export default function CareerConsole() {
           </div>
         </section>
 
-        {loading || rows.length === 0 ? (
-          <JdIntakeHelper />
+        {loading ? (
+          <section className="rounded-lg border border-dashed border-gray-300 bg-white p-5 text-sm text-gray-600">
+            Loading local career versions...
+          </section>
+        ) : rows.length === 0 ? (
+          <div className="space-y-4">
+            <section className="rounded-lg border border-gray-200 bg-white p-5 text-sm text-gray-600">
+              {loadError || 'No local career versions loaded yet. Generate or sync a local version to populate the console.'}
+            </section>
+            <JdIntakeHelper />
+          </div>
         ) : (
           <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(320px,420px)_1fr]">
             <ApplicationBoard rows={rows} selectedSlug={selected?.slug} onSelect={setSelectedSlug} onUpdate={updateRecord} />

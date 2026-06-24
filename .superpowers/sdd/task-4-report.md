@@ -46,3 +46,23 @@ Verification after the fix:
 - `npm run career:test` — passed, 12 tests green.
 - `VITE_ENABLE_CAREER_CONSOLE=true npm run build` — passed, production build completed successfully.
 - `npm run build` — passed, production build completed successfully.
+
+Follow-up fix section (Task 4 review round 2):
+- Added recoverable load handling in `src/career/CareerConsole.jsx` so a rejected local data fetch or JSON parse failure clears loading, preserves a compact local-only empty state, and surfaces a short recovery message instead of leaving `/career` stuck.
+- Updated `src/career/ApplicationBoard.jsx` PDF links to open generated resumes in a new tab with `rel="noreferrer"` for clearer manual-review behavior.
+- Added focused verification in `src/career/__tests__/careerConsoleComponents.test.mjs` covering:
+  - load recovery contract for the career console loader
+  - row selection callback wiring
+  - status update callback wiring
+  - PDF link rendering/open contract
+
+RED evidence:
+- `node --test src/career/__tests__/careerConsoleComponents.test.mjs` — failed before the fix with:
+  - `TypeError: module.loadCareerConsoleState is not a function`
+  - `AssertionError: expected PDF link target to equal "_blank"`
+
+GREEN evidence:
+- `node --test src/career/__tests__/careerConsoleComponents.test.mjs` — passed, 4/4 tests green after the fix.
+- `npm run career:test` — passed, 16 tests green total after adding the new focused coverage.
+- `VITE_ENABLE_CAREER_CONSOLE=true npm run build` — passed.
+- `npm run build` — passed.

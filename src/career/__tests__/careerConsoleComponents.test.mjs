@@ -1,0 +1,122 @@
+import test from 'node:test'
+import assert from 'node:assert/strict'
+import path from 'node:path'
+import os from 'node:os'
+import { pathToFileURL } from 'node:url'
+import { build } from 'esbuild'
+
+const projectRoot = '/private/tmp/resume-web-worktrees/codex/medical-resume-ops'
+
+async function importJsxModule(relativePath) {
+  const entryPoint = path.join(projectRoot, relativePath)
+  const outfile = path.join(
+    os.tmpdir(),
+    `career-test-${path.basename(relativePath, path.extname(relativePath))}-${Date.now()}-${Math.random().toString(16).slice(2)}.mjs`,
+  )
+
+  await build({
+    entryPoints: [entryPoint],
+    outfile,
+    bundle: true,
+    format: 'esm',
+    platform: 'node',
+    jsx: 'automatic',
+    absWorkingDir: projectRoot,
+    loader: {
+      '.js': 'js',
+      '.jsx': 'jsx',
+    },
+    logLevel: 'silent',
+  })
+
+  return import(`${pathToFileURL(outfile).href}?t=${Date.now()}`)
+}
+
+function findElements(node, predicate, matches = []) {
+  if (!node || typeof node !== 'object') {
+    return matches
+  }
+
+  if (predicate(node)) {
+    matches.push(node)
+  }
+
+  const children = node.props?.children
+  if (Array.isArray(children)) {
+    for (const child of children) {
+      findElements(child, predicate, matches)
+    }
+  } else if (children) {
+    findElements(children, predicate, matches)
+  }
+
+  return matches
+}
+
+test('loadCareerConsoleState clears loading and surfaces a compact error on loader failure', async () => {
+  const module = await importJsxModule('src/career/CareerConsole.jsx')
+  const result = await module.loadCareerConsoleState(async () => {
+    throw new Error('bad json')
+  })
+
+  assert.equal(result.loading, false)
+  assert.deepEqual(result.careerVersions, [])
+  assert.match(result.loadError, /unable to load/i)
+})
+
+test('ApplicationBoard row button selection calls onSelect with the row slug', async () => {
+  const { default: ApplicationBoard } = await importJsxModule('src/career/ApplicationBoard.jsx')
+  const rows = [
+    { slug: 'medical-ai', label: 'Medical AI Lead', archetype: 'Medical AI', nextAction: 'Review evidence', status: 'generated' },
+    { slug: 'medical-ops', label: 'Medical Ops Lead', archetype: 'Medical Ops', nextAction: 'Submit manually', status: 'ready_to_apply' },
+  ]
+  const selected = []
+  const tree = ApplicationBoard({ rows, selectedSlug: 'medical-ai', onSelect: (slug) => selected.push(slug), onUpdate: () => {} })
+  const buttons = findElements(tree, (node) => node.type === 'button')
+
+  assert.equal(buttons.length, 2)
+  buttons[1].props.onClick()
+  assert.deepEqual(selected, ['medical-ops'])
+})
+
+test('ApplicationBoard status selector sends the row slug and next status to onUpdate', async () => {
+  const { default: ApplicationBoard } = await importJsxModule('src/career/ApplicationBoard.jsx')
+  const rows = [
+    {
+      slug: 'medical-ai',
+      label: 'Medical AI Lead',
+      archetype: 'Medical AI',
+      nextAction: 'Review evidence',
+      status: 'generated',
+      pdfPath: '/generated-resumes/medical-ai.pdf',
+    },
+  ]
+  const updates = []
+  const tree = ApplicationBoard({ rows, selectedSlug: 'medical-ai', onSelect: () => {}, onUpdate: (slug, patch) => updates.push([slug, patch]) })
+  const selects = findElements(tree, (node) => node.type === 'select')
+
+  assert.equal(selects.length, 1)
+  selects[0].props.onChange({ target: { value: 'applied' } })
+  assert.deepEqual(updates, [['medical-ai', { status: 'applied' }]])
+})
+
+test('ApplicationBoard renders PDF links that open the generated resume in a new tab', async () => {
+  const { default: ApplicationBoard } = await importJsxModule('src/career/ApplicationBoard.jsx')
+  const rows = [
+    {
+      slug: 'medical-ai',
+      label: 'Medical AI Lead',
+      archetype: 'Medical AI',
+      nextAction: 'Review evidence',
+      status: 'generated',
+      pdfPath: '/generated-resumes/medical-ai.pdf',
+    },
+  ]
+  const tree = ApplicationBoard({ rows, selectedSlug: 'medical-ai', onSelect: () => {}, onUpdate: () => {} })
+  const links = findElements(tree, (node) => node.type === 'a')
+
+  assert.equal(links.length, 1)
+  assert.equal(links[0].props.href, '/generated-resumes/medical-ai.pdf')
+  assert.equal(links[0].props.target, '_blank')
+  assert.match(links[0].props.rel, /noreferrer/)
+})

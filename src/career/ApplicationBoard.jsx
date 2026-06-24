@@ -30,7 +30,7 @@ export default function ApplicationBoard({ rows, selectedSlug, onSelect, onUpdat
                 </select>
               </label>
               {row.pdfPath ? (
-                <a className="text-sm text-teal-700 hover:underline" href={row.pdfPath}>
+                <a className="text-sm text-teal-700 hover:underline" href={row.pdfPath} target="_blank" rel="noreferrer">
                   PDF
                 </a>
               ) : (
