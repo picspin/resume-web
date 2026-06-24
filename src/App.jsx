@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { lazy, Suspense, useState, useEffect } from 'react'
 import resumeEn from './data/resume-en.json'
 import resumeZh from './data/resume-zh.json'
 import resumeVersions from './data/resume-versions.json'
@@ -6,8 +6,9 @@ import ResumeSection from './components/ResumeSection'
 import Header from './components/Header'
 import ContactInfo from './components/ContactInfo'
 import { isCareerConsoleEnabled, isCareerPath } from './career/careerConsoleEnabled'
-import CareerConsole from './career/CareerConsole'
 import './App.css'
+
+const CareerConsole = lazy(() => import('./career/CareerConsole'))
 
 function App() {
   const [lang, setLang] = useState('en')
@@ -30,7 +31,20 @@ function App() {
   const careerEnabled = isCareerConsoleEnabled({ env: import.meta.env, pathname })
 
   if (careerEnabled) {
-    return <CareerConsole />
+    return (
+      <Suspense
+        fallback={
+          <div className="min-h-screen bg-gray-50 text-gray-900 flex items-center justify-center px-4">
+            <div className="max-w-md text-center">
+              <h1 className="text-2xl font-semibold mb-3">Career Console</h1>
+              <p className="text-gray-600">Loading local application workflow...</p>
+            </div>
+          </div>
+        }
+      >
+        <CareerConsole />
+      </Suspense>
+    )
   }
 
   if (isCareerPath(pathname)) {

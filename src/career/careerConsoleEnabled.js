@@ -5,5 +5,5 @@ export function isCareerPath(pathname = '/') {
 
 export function isCareerConsoleEnabled({ env = {}, pathname = '/' } = {}) {
   const enabled = String(env.VITE_ENABLE_CAREER_CONSOLE || '').toLowerCase()
-  return isCareerPath(pathname) && (enabled === 'true' || enabled === '1')
+  return env.DEV === true && isCareerPath(pathname) && (enabled === 'true' || enabled === '1')
 }
