@@ -4,6 +4,7 @@ import { analyzeJD } from './lib/jd-analysis.mjs';
 import { loadSourceResume } from './lib/source-resume.mjs';
 import { adaptResume } from './lib/adapter.mjs';
 import { renderEvaluation } from './lib/evaluation.mjs';
+import { resolveCareerVersionDir } from './lib/paths.mjs';
 
 function parseArgs(argv) {
   const args = new Map();
@@ -33,7 +34,7 @@ export async function main(argv = process.argv.slice(2)) {
   const masterResume = await loadSourceResume({ rootDir: process.cwd(), language: 'en' });
   const jdAnalysis = analyzeJD(jdText);
   const { resume, metadata } = adaptResume(masterResume, jdAnalysis);
-  const outDir = join(process.cwd(), 'career', 'versions', slug);
+  const outDir = resolveCareerVersionDir({ rootDir: process.cwd(), slug });
 
   await writeJson(join(outDir, 'resume.json'), resume);
   await writeJson(join(outDir, 'metadata.json'), metadata);

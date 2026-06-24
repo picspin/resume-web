@@ -10,9 +10,9 @@ import './App.css'
 
 const shouldLoadCareerConsole =
   import.meta.env.DEV &&
-  ['true', '1'].includes(String(import.meta.env.VITE_ENABLE_CAREER_CONSOLE || '').toLowerCase())
+  isCareerConsoleEnabled({ env: import.meta.env, pathname: '/career' })
 
-const CareerConsole = shouldLoadCareerConsole
+const CareerConsole = import.meta.env.DEV
   ? lazy(() => import('./career/CareerConsole'))
   : null
 
@@ -57,8 +57,8 @@ function App() {
     return (
       <div className="min-h-screen bg-gray-50 text-gray-900 flex items-center justify-center px-4">
         <div className="max-w-md text-center">
-          <h1 className="text-2xl font-semibold mb-3">Career console is local-only</h1>
-          <p className="text-gray-600">Run the dev server with VITE_ENABLE_CAREER_CONSOLE=true to open this workspace.</p>
+          <h1 className="text-2xl font-semibold mb-3">Page not found</h1>
+          <p className="text-gray-600">This page is not available.</p>
         </div>
       </div>
     )

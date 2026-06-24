@@ -26,6 +26,42 @@ test('public manifest omits private review metadata', () => {
   assert.equal(Object.hasOwn(publicEntry, 'evaluationMarkdown'), false);
 });
 
+test('public manifest strips nested private resume fields recursively', () => {
+  const sourceResume = {
+    ...resume,
+    jdText: 'confidential job description',
+    nested: {
+      applicationNotes: 'private notes',
+      safe: 'keep me',
+      items: [
+        {
+          evaluationMarkdown: '# private',
+          label: 'keep nested label',
+        },
+      ],
+    },
+    work: [
+      {
+        title: 'Lead',
+        truthWarnings: ['private warning'],
+        applicationUrl: 'https://private.example.com/apply',
+        details: ['keep public detail'],
+      },
+    ],
+  };
+
+  const { publicEntry } = buildManifestEntry({ slug: 'medical-ai', metadata, resume: sourceResume, evaluationMarkdown: '# Review' });
+
+  assert.equal(Object.hasOwn(publicEntry.resume, 'jdText'), false);
+  assert.equal(Object.hasOwn(publicEntry.resume.nested, 'applicationNotes'), false);
+  assert.equal(publicEntry.resume.nested.safe, 'keep me');
+  assert.equal(Object.hasOwn(publicEntry.resume.nested.items[0], 'evaluationMarkdown'), false);
+  assert.equal(publicEntry.resume.nested.items[0].label, 'keep nested label');
+  assert.equal(Object.hasOwn(publicEntry.resume.work[0], 'truthWarnings'), false);
+  assert.equal(Object.hasOwn(publicEntry.resume.work[0], 'applicationUrl'), false);
+  assert.deepEqual(publicEntry.resume.work[0].details, ['keep public detail']);
+});
+
 test('local career manifest includes review metadata and evaluation text', () => {
   const { careerEntry } = buildManifestEntry({ slug: 'medical-ai', metadata, resume, evaluationMarkdown: '# Review' });
   assert.deepEqual(careerEntry.metadata.truthWarnings, ['Do not claim unsupported ownership.']);

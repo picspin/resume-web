@@ -14,6 +14,7 @@ const forbiddenMarkers = [
   'Application Board',
   'Manual Apply Pack',
   'career-versions.local.json',
+  'VITE_ENABLE_CAREER_CONSOLE',
 ]
 
 async function collectFiles(rootDir) {
@@ -65,4 +66,15 @@ test('default production build does not emit detailed career console code', asyn
       `found forbidden production marker "${marker}" in default build output`,
     )
   }
+})
+
+test('production build serves a generic career fallback without local workflow hints', async () => {
+  const outDir = await buildApp()
+  const html = await fs.readFile(path.join(outDir, 'index.html'), 'utf8')
+  const jsFiles = (await collectFiles(outDir)).filter((file) => file.endsWith('.js'))
+  const contents = (await Promise.all(jsFiles.map((file) => fs.readFile(file, 'utf8')))).join('\n')
+
+  assert.doesNotMatch(contents, /Career console is local-only/)
+  assert.doesNotMatch(contents, /VITE_ENABLE_CAREER_CONSOLE/)
+  assert.match(html, /<div id="root"><\/div>/)
 })
