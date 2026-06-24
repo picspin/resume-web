@@ -1,0 +1,102 @@
+{
+  "roleLabel": "Sample JD: Medical Digital Innovation and Product Strategy Lead",
+  "archetypes": [
+    {
+      "id": "clinical-modeling-rwd-analytics",
+      "label": "Clinical Modeling, RWD / RWE, and Trial Analytics",
+      "score": 2,
+      "matchedSignals": [
+        "rwd",
+        "rwe"
+      ]
+    },
+    {
+      "id": "healthcare-digital-transformation",
+      "label": "Healthcare Digital Transformation",
+      "score": 2,
+      "matchedSignals": [
+        "adoption",
+        "enablement"
+      ]
+    },
+    {
+      "id": "medical-affairs-ai-integrated-solutions",
+      "label": "Medical Affairs AI / Integrated Healthcare Solutions",
+      "score": 2,
+      "matchedSignals": [
+        "medical affairs",
+        "access"
+      ]
+    },
+    {
+      "id": "medical-device-portfolio-strategy",
+      "label": "Medical Device Portfolio / Product Strategy",
+      "score": 2,
+      "matchedSignals": [
+        "competitive landscape",
+        "business case"
+      ]
+    },
+    {
+      "id": "clinical-application-scientific-solution",
+      "label": "Clinical Application / Scientific Solution Lead",
+      "score": 1,
+      "matchedSignals": [
+        "kol"
+      ]
+    },
+    {
+      "id": "medical-bd-ecosystem-partnership",
+      "label": "Medical BD / Ecosystem Partnership",
+      "score": 1,
+      "matchedSignals": [
+        "business development"
+      ]
+    },
+    {
+      "id": "medical-digital-product-marketing",
+      "label": "Medical Digital Product Marketing",
+      "score": 1,
+      "matchedSignals": [
+        "product marketing"
+      ]
+    },
+    {
+      "id": "pharma-clinical-development-operations",
+      "label": "Pharma Clinical Development / Operations Innovation",
+      "score": 1,
+      "matchedSignals": [
+        "cro"
+      ]
+    }
+  ],
+  "keywords": [
+    "medical ai",
+    "product marketing",
+    "adoption",
+    "enablement",
+    "competitive landscape",
+    "business case",
+    "business development",
+    "cro",
+    "rwd",
+    "rwe",
+    "medical affairs",
+    "access"
+  ],
+  "generatedAt": "2026-06-24T02:41:58.421Z",
+  "rewritePolicy": "truth-based-reorder-and-reframe",
+  "selectedProjects": [
+    "Involving Global Management Graduation Program",
+    "Crossfunctional Platforming capabilities",
+    "Digital Solution business",
+    "AI-Powered Marketing Research",
+    "Radimetrics Application & Development",
+    "PV.AI Workflow Initiative & Dataset Building (Primovist AI Project)"
+  ],
+  "truthWarnings": [
+    "Do not claim direct radiation therapy product ownership unless later source evidence supports it.",
+    "Do not claim NMPA registration leadership unless later source evidence supports it.",
+    "Do not claim clinical trial start-up ownership, CTA/NDA ownership, signed-deal ownership, or line-management scope unless later source evidence supports it."
+  ]
+}
