@@ -1,0 +1,51 @@
+candidate:
+  full_name: "Xiaolei Zhu, PhD"
+  location: "Guangzhou, Guangdong, China"
+  email_work: "xiaolei.zhu@bayer.com"
+  email_private: "zxl1412@gmail.com"
+  phone_cn: "+86 18607106505"
+  phone_de: "+49 15203046915"
+  portfolio_url: "https://picspin.github.io"
+  github: "https://github.com/picspin"
+  linkedin: "https://www.linkedin.com/in/xiaolei-hilbert-space/"
+
+positioning:
+  headline: "AI-enabled healthcare innovation and digital radiology leader"
+  summary_scope:
+    - "Medical imaging and radiology"
+    - "Healthcare digitalization and medical AI"
+    - "China/APAC/global localization"
+    - "Product strategy, clinical applications, and scientific solution building"
+  non_negotiable_truth_rules:
+    - "Do not invent direct radiation therapy product ownership."
+    - "Do not invent NMPA registration leadership."
+    - "Do not invent clinical trial start-up ownership, CTA/NDA ownership, signed-deal ownership, or line-management scope."
+    - "Use adjacent positioning when the resume supports related but not identical experience."
+
+target_roles:
+  primary:
+    - "Digital Health Product Marketing / Product Manager"
+    - "Medical AI Solution / Clinical Workflow Lead"
+    - "Healthcare Digital Transformation / Innovation Lead"
+    - "Medical Device Product Strategy / Portfolio Manager"
+    - "Medical BD / Strategic Partnership / Ecosystem Development"
+  adjacent:
+    - "Pharma Clinical Development / Clinical Operations Innovation"
+    - "Clinical Modeling, RWD / RWE, and Trial Analytics Lead"
+    - "Medical Affairs AI / Integrated Healthcare Solution Lead"
+    - "Pharma R&D Open Innovation / External Innovation BD"
+    - "Medical AI Evaluation / Standards / Scientific Committee Lead"
+    - "Medical Device / Imaging Solution R&D Innovation Lead"
+
+signature_advantages:
+  - "PhD-level MR imaging and molecular imaging foundation"
+  - "Siemens and Bayer medical imaging domain experience"
+  - "Global/APAC/China localization bridge"
+  - "LLM/RAG, Google Cloud, AI/ML, MONAI, Python, R, Matlab, and SQL exposure"
+  - "Hospital, academic, vendor, KOL, and internal stakeholder ecosystem experience"
+  - "Product marketing, portfolio strategy, business case, and sales enablement"
+
+output:
+  default_language: "en"
+  default_paper_format: "a4"
+  public_pdf_base_path: "/generated-resumes"
