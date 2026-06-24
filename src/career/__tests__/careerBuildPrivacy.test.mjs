@@ -4,10 +4,11 @@ import fs from 'node:fs/promises'
 import os from 'node:os'
 import path from 'node:path'
 import { execFile } from 'node:child_process'
+import { fileURLToPath } from 'node:url'
 import { promisify } from 'node:util'
 
 const execFileAsync = promisify(execFile)
-const projectRoot = '/private/tmp/resume-web-worktrees/codex/medical-resume-ops'
+const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..', '..')
 const forbiddenMarkers = [
   'Career Console',
   'Application Board',
@@ -43,6 +44,13 @@ async function buildApp(env = {}) {
 
   return outDir
 }
+
+test('careerBuildPrivacy test derives project root instead of hard-coding a worktree path', async () => {
+  const source = await fs.readFile(new URL(import.meta.url), 'utf8')
+
+  assert.doesNotMatch(source, /\/private\/tmp\/resume-web-worktrees\/codex\/medical-resume-ops/)
+  assert.equal(projectRoot, path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..', '..'))
+})
 
 test('default production build does not emit detailed career console code', async () => {
   const outDir = await buildApp()

@@ -7,11 +7,60 @@ function escapeHtml(value) {
     .replaceAll('>', '&gt;')
 }
 
+function isSafeUrl(value) {
+  if (!value) return false
+
+  const trimmed = String(value).trim()
+  if (!trimmed || trimmed.startsWith('//')) return false
+  if (
+    trimmed.startsWith('#') ||
+    trimmed.startsWith('/') ||
+    trimmed.startsWith('./') ||
+    trimmed.startsWith('../') ||
+    trimmed.startsWith('?')
+  ) {
+    return true
+  }
+
+  const normalized = trimmed.replaceAll(/[\u0000-\u001f\u007f\s]+/g, '').toLowerCase()
+  const schemeMatch = normalized.match(/^([a-z][a-z0-9+.-]*):/)
+
+  if (!schemeMatch) {
+    return true
+  }
+
+  return ['http', 'https', 'mailto'].includes(schemeMatch[1])
+}
+
+function renderSafeMarkdown(markdown) {
+  const renderer = new marked.Renderer()
+  const baseLinkRenderer = renderer.link.bind(renderer)
+  const baseImageRenderer = renderer.image.bind(renderer)
+
+  renderer.link = function renderLink(token) {
+    if (!isSafeUrl(token.href)) {
+      return this.parser.parseInline(token.tokens)
+    }
+
+    return baseLinkRenderer(token)
+  }
+
+  renderer.image = function renderImage(token) {
+    if (!isSafeUrl(token.href)) {
+      return escapeHtml(token.text || '')
+    }
+
+    return baseImageRenderer(token)
+  }
+
+  return marked.parse(markdown, { renderer })
+}
+
 export default function EvidenceReview({ version }) {
   if (!version) return null
 
   const safeMarkdown = escapeHtml(version.evaluationMarkdown || 'No evaluation generated yet.')
-  const html = marked.parse(safeMarkdown)
+  const html = renderSafeMarkdown(safeMarkdown)
   const warnings = version.metadata?.truthWarnings || []
   const keywords = version.metadata?.keywords || []
 

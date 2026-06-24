@@ -1,11 +1,12 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
+import fs from 'node:fs/promises'
 import path from 'node:path'
 import os from 'node:os'
-import { pathToFileURL } from 'node:url'
+import { fileURLToPath, pathToFileURL } from 'node:url'
 import { build } from 'esbuild'
 
-const projectRoot = '/private/tmp/resume-web-worktrees/codex/medical-resume-ops'
+const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..', '..')
 
 async function importJsxModule(relativePath) {
   const entryPoint = path.join(projectRoot, relativePath)
@@ -52,6 +53,13 @@ function findElements(node, predicate, matches = []) {
 
   return matches
 }
+
+test('careerConsoleComponents test derives project root instead of hard-coding a worktree path', async () => {
+  const source = await fs.readFile(new URL(import.meta.url), 'utf8')
+
+  assert.doesNotMatch(source, /\/private\/tmp\/resume-web-worktrees\/codex\/medical-resume-ops/)
+  assert.equal(projectRoot, path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..', '..'))
+})
 
 test('loadCareerConsoleState clears loading and surfaces a compact error on loader failure', async () => {
   const module = await importJsxModule('src/career/CareerConsole.jsx')
@@ -125,7 +133,10 @@ test('EvidenceReview keeps markdown formatting but does not render raw HTML from
   const { default: EvidenceReview } = await importJsxModule('src/career/EvidenceReview.jsx')
   const tree = EvidenceReview({
     version: {
-      evaluationMarkdown: '# Summary\n\n<script>alert("xss")</script>\n\n- evidence item\n\n<img src=x onerror="alert(1)">',
+      evaluationMarkdown:
+        '# Summary\n\n[Safe link](https://example.com)\n\n[Jump link](#evidence)\n\n' +
+        '[Bad link](javascript:alert(1))\n\n![Bad image](javascript:alert(2))\n\n' +
+        '<script>alert("xss")</script>\n\n- evidence item\n\n<img src=x onerror="alert(1)">',
       metadata: {},
     },
   })
@@ -134,6 +145,10 @@ test('EvidenceReview keeps markdown formatting but does not render raw HTML from
 
   assert.match(html, /<h1/i)
   assert.match(html, /<li>evidence item<\/li>/i)
+  assert.match(html, /href="https:\/\/example\.com"/i)
+  assert.match(html, /href="#evidence"/i)
+  assert.doesNotMatch(html, /href="javascript:/i)
+  assert.doesNotMatch(html, /src="javascript:/i)
   assert.doesNotMatch(html, /<script/i)
   assert.doesNotMatch(html, /<img/i)
   assert.match(html, /&lt;script&gt;alert\(&quot;xss&quot;\)&lt;\/script&gt;/i)

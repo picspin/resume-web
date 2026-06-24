@@ -86,3 +86,20 @@ GREEN evidence:
 - `rg -n "Career Console|Application Board|Manual Apply Pack|career-versions.local.json" dist/assets/index-c60a59f8.js` — no matches in the default production bundle.
 - `VITE_ENABLE_CAREER_CONSOLE=true npm run build` — passed.
 - `rg -n "Career Console|Application Board|Manual Apply Pack|career-versions.local.json" dist/assets/index-b4b1a8e4.js` — no matches in the flagged production bundle either.
+
+Follow-up fix section (Task 4 review round 4):
+- Neutralized unsafe markdown-generated URLs in `src/career/EvidenceReview.jsx` by adding an allowlist for `http`, `https`, `mailto`, relative paths, query-relative paths, and anchor links before `marked` emits `<a>` or `<img>` HTML. Unsafe links now fall back to plain text, and unsafe images fall back to escaped alt text.
+- Replaced the hard-coded worktree root in both Task 4 test files with a path derived from each test file’s `import.meta.url`, so the focused component tests and build privacy test run in any clone or worktree.
+- Added focused regression coverage in:
+  - `src/career/__tests__/careerConsoleComponents.test.mjs`
+  - `src/career/__tests__/careerBuildPrivacy.test.mjs`
+
+RED evidence:
+- `node --test src/career/__tests__/careerConsoleComponents.test.mjs src/career/__tests__/careerBuildPrivacy.test.mjs` — failed before the fix with:
+  - `AssertionError [ERR_ASSERTION]: expected test source to not contain /private/tmp/resume-web-worktrees/codex/medical-resume-ops/`
+  - `AssertionError [ERR_ASSERTION]: expected evaluation markdown output to not contain href="javascript:"`
+
+GREEN evidence:
+- `node --test src/career/__tests__/careerConsoleComponents.test.mjs src/career/__tests__/careerBuildPrivacy.test.mjs` — passed, 8/8 tests green after the fix.
+- `npm run career:test` — passed, 20 tests green total.
+- `npm run build` — passed, default production build completed successfully.
