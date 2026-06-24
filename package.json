@@ -11,12 +11,15 @@
     "resume:test": "node --test scripts/resume-ops/__tests__/*.test.mjs",
     "resume:sync": "node scripts/resume-ops/sync-master.mjs",
     "resume:adapt": "node scripts/resume-ops/adapt-resume.mjs",
-    "resume:build": "node scripts/resume-ops/build-version.mjs"
+    "resume:build": "node scripts/resume-ops/build-version.mjs",
+    "resume:pdf": "node scripts/resume-ops/render-pdf.mjs"
   },
   "dependencies": {
     "framer-motion": "^12.23.0",
+    "js-yaml": "^5.1.0",
     "lucide-react": "^0.263.1",
     "marked": "^16.0.0",
+    "playwright": "^1.61.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
