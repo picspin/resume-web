@@ -1,0 +1,38 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {
+  CAREER_STORAGE_KEY,
+  readApplicationState,
+  updateApplicationRecord,
+  writeApplicationState,
+} from '../applicationState.js';
+
+function memoryStorage(initial = {}) {
+  const store = new Map(Object.entries(initial));
+  return {
+    getItem: (key) => store.get(key) ?? null,
+    setItem: (key, value) => store.set(key, value),
+    removeItem: (key) => store.delete(key),
+    dump: () => Object.fromEntries(store),
+  };
+}
+
+test('returns empty state when storage is unavailable or corrupt', () => {
+  assert.deepEqual(readApplicationState(null), {});
+  const storage = memoryStorage({ [CAREER_STORAGE_KEY]: '{bad json' });
+  assert.deepEqual(readApplicationState(storage), {});
+});
+
+test('writes and reads application state', () => {
+  const storage = memoryStorage();
+  writeApplicationState(storage, { role: { status: 'reviewing' } });
+  assert.deepEqual(readApplicationState(storage), { role: { status: 'reviewing' } });
+});
+
+test('updates one slug with default status and timestamp', () => {
+  const next = updateApplicationRecord({}, 'medical-ai', { status: 'ready_to_apply', notes: 'Confirm summary' }, '2026-06-24T00:00:00.000Z');
+  assert.equal(Object.hasOwn(next, 'medical-ai'), true);
+  assert.equal(next['medical-ai'].status, 'ready_to_apply');
+  assert.equal(next['medical-ai'].notes, 'Confirm summary');
+  assert.equal(next['medical-ai'].updatedAt, '2026-06-24T00:00:00.000Z');
+});
