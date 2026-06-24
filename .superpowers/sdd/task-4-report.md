@@ -66,3 +66,23 @@ GREEN evidence:
 - `npm run career:test` — passed, 16 tests green total after adding the new focused coverage.
 - `VITE_ENABLE_CAREER_CONSOLE=true npm run build` — passed.
 - `npm run build` — passed.
+
+Follow-up fix section (Task 4 review round 3):
+- Tightened `src/App.jsx` so the local career console loader is only created when both Vite dev mode and `VITE_ENABLE_CAREER_CONSOLE` are enabled, preventing the default production bundle from emitting detailed career-console code by default while preserving the disabled `/career` message.
+- Hardened `src/career/EvidenceReview.jsx` by escaping raw HTML before `marked.parse(...)`, preserving headings and lists while blocking executable HTML from JD-derived markdown.
+- Added focused regression coverage in:
+  - `src/career/__tests__/careerBuildPrivacy.test.mjs`
+  - `src/career/__tests__/careerConsoleComponents.test.mjs`
+
+RED evidence:
+- `node --test src/career/__tests__/careerBuildPrivacy.test.mjs src/career/__tests__/careerConsoleComponents.test.mjs` — failed before the fix with:
+  - `AssertionError: found forbidden production marker "Career Console" in default build output`
+  - `AssertionError: expected evaluation markdown output to not contain raw <script> HTML`
+
+GREEN evidence:
+- `node --test src/career/__tests__/careerBuildPrivacy.test.mjs src/career/__tests__/careerConsoleComponents.test.mjs` — passed, 6/6 tests green after the fix.
+- `npm run career:test` — passed, 18 tests green total.
+- `npm run build` — passed, default production build completed successfully.
+- `rg -n "Career Console|Application Board|Manual Apply Pack|career-versions.local.json" dist/assets/index-c60a59f8.js` — no matches in the default production bundle.
+- `VITE_ENABLE_CAREER_CONSOLE=true npm run build` — passed.
+- `rg -n "Career Console|Application Board|Manual Apply Pack|career-versions.local.json" dist/assets/index-b4b1a8e4.js` — no matches in the flagged production bundle either.

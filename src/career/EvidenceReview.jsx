@@ -1,9 +1,17 @@
 import { marked } from 'marked'
 
+function escapeHtml(value) {
+  return String(value)
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+}
+
 export default function EvidenceReview({ version }) {
   if (!version) return null
 
-  const html = marked.parse(version.evaluationMarkdown || 'No evaluation generated yet.')
+  const safeMarkdown = escapeHtml(version.evaluationMarkdown || 'No evaluation generated yet.')
+  const html = marked.parse(safeMarkdown)
   const warnings = version.metadata?.truthWarnings || []
   const keywords = version.metadata?.keywords || []
 

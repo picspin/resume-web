@@ -8,7 +8,13 @@ import ContactInfo from './components/ContactInfo'
 import { isCareerConsoleEnabled, isCareerPath } from './career/careerConsoleEnabled'
 import './App.css'
 
-const CareerConsole = lazy(() => import('./career/CareerConsole'))
+const shouldLoadCareerConsole =
+  import.meta.env.DEV &&
+  ['true', '1'].includes(String(import.meta.env.VITE_ENABLE_CAREER_CONSOLE || '').toLowerCase())
+
+const CareerConsole = shouldLoadCareerConsole
+  ? lazy(() => import('./career/CareerConsole'))
+  : null
 
 function App() {
   const [lang, setLang] = useState('en')
@@ -30,13 +36,13 @@ function App() {
   const pathname = window.location.pathname
   const careerEnabled = isCareerConsoleEnabled({ env: import.meta.env, pathname })
 
-  if (careerEnabled) {
+  if (careerEnabled && CareerConsole) {
     return (
       <Suspense
         fallback={
           <div className="min-h-screen bg-gray-50 text-gray-900 flex items-center justify-center px-4">
             <div className="max-w-md text-center">
-              <h1 className="text-2xl font-semibold mb-3">Career Console</h1>
+              <h1 className="text-2xl font-semibold mb-3">Loading workspace</h1>
               <p className="text-gray-600">Loading local application workflow...</p>
             </div>
           </div>

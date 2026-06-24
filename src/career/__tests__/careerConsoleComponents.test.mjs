@@ -120,3 +120,22 @@ test('ApplicationBoard renders PDF links that open the generated resume in a new
   assert.equal(links[0].props.target, '_blank')
   assert.match(links[0].props.rel, /noreferrer/)
 })
+
+test('EvidenceReview keeps markdown formatting but does not render raw HTML from evaluation markdown', async () => {
+  const { default: EvidenceReview } = await importJsxModule('src/career/EvidenceReview.jsx')
+  const tree = EvidenceReview({
+    version: {
+      evaluationMarkdown: '# Summary\n\n<script>alert("xss")</script>\n\n- evidence item\n\n<img src=x onerror="alert(1)">',
+      metadata: {},
+    },
+  })
+  const [htmlBlock] = findElements(tree, (node) => typeof node.props?.dangerouslySetInnerHTML?.__html === 'string')
+  const html = htmlBlock.props.dangerouslySetInnerHTML.__html
+
+  assert.match(html, /<h1/i)
+  assert.match(html, /<li>evidence item<\/li>/i)
+  assert.doesNotMatch(html, /<script/i)
+  assert.doesNotMatch(html, /<img/i)
+  assert.match(html, /&lt;script&gt;alert\(&quot;xss&quot;\)&lt;\/script&gt;/i)
+  assert.match(html, /&lt;img src=x onerror=&quot;alert\(1\)&quot;&gt;/i)
+})
