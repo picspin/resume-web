@@ -1,5 +1,6 @@
 import { readdir, readFile, writeFile, mkdir } from 'node:fs/promises'
 import { join } from 'node:path'
+import { buildManifests } from './lib/manifest.mjs'
 
 async function pathExists(path) {
   try {
@@ -13,26 +14,21 @@ async function pathExists(path) {
 const root = process.cwd()
 const versionsDir = join(root, 'career', 'versions')
 const slugs = await readdir(versionsDir)
-const versions = []
+const records = []
 
 for (const slug of slugs) {
   const metadataPath = join(versionsDir, slug, 'metadata.json')
   const resumePath = join(versionsDir, slug, 'resume.json')
+  const evaluationPath = join(versionsDir, slug, 'evaluation.md')
   if (!(await pathExists(metadataPath)) || !(await pathExists(resumePath))) continue
   const metadata = JSON.parse(await readFile(metadataPath, 'utf8'))
   const resume = JSON.parse(await readFile(resumePath, 'utf8'))
-  versions.push({
-    slug,
-    label: metadata.roleLabel || slug,
-    archetype: metadata.archetypes?.[0]?.label || 'Medical Role',
-    generatedAt: metadata.generatedAt,
-    pdfPath: metadata.pdf?.publicPath || '',
-    resume,
-    metadata,
-  })
+  const evaluationMarkdown = await pathExists(evaluationPath) ? await readFile(evaluationPath, 'utf8') : ''
+  records.push({ slug, metadata, resume, evaluationMarkdown })
 }
 
-versions.sort((a, b) => String(b.generatedAt).localeCompare(String(a.generatedAt)))
+const { publicVersions, careerVersions } = buildManifests(records)
 await mkdir(join(root, 'src', 'data'), { recursive: true })
-await writeFile(join(root, 'src', 'data', 'resume-versions.json'), `${JSON.stringify(versions, null, 2)}\n`, 'utf8')
-console.log(`Wrote ${versions.length} resume version(s)`)
+await writeFile(join(root, 'src', 'data', 'resume-versions.json'), `${JSON.stringify(publicVersions, null, 2)}\n`, 'utf8')
+await writeFile(join(root, 'src', 'data', 'career-versions.local.json'), `${JSON.stringify(careerVersions, null, 2)}\n`, 'utf8')
+console.log(`Wrote ${publicVersions.length} public resume version(s) and ${careerVersions.length} local career version(s)`)
