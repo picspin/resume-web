@@ -1,14 +1,20 @@
-import { useState, useEffect } from 'react'
-import { Sun, Moon, Download, Globe, Mail, Phone, MapPin } from 'lucide-react'
+import { lazy, Suspense, useState, useEffect } from 'react'
 import resumeEn from './data/resume-en.json'
 import resumeZh from './data/resume-zh.json'
+import resumeVersions from './data/resume-versions.json'
 import ResumeSection from './components/ResumeSection'
 import Header from './components/Header'
 import ContactInfo from './components/ContactInfo'
+import { isCareerConsoleEnabled, isCareerPath } from './career/careerConsoleEnabled'
 import './App.css'
+
+const CareerConsole = import.meta.env.DEV
+  ? lazy(() => import('./career/CareerConsole'))
+  : null
 
 function App() {
   const [lang, setLang] = useState('en')
+  const [selectedVersion, setSelectedVersion] = useState('default')
   const [dark, setDark] = useState(() => {
     const saved = localStorage.getItem('darkMode')
     return saved ? JSON.parse(saved) : window.matchMedia('(prefers-color-scheme: dark)').matches
@@ -23,9 +29,50 @@ function App() {
     }
   }, [dark])
 
-  const data = lang === 'en' ? resumeEn : resumeZh
+  const pathname = window.location.pathname
+  const careerEnabled = isCareerConsoleEnabled({ env: import.meta.env, pathname })
+
+  if (careerEnabled && CareerConsole) {
+    return (
+      <Suspense
+        fallback={
+          <div className="min-h-screen bg-gray-50 text-gray-900 flex items-center justify-center px-4">
+            <div className="max-w-md text-center">
+              <h1 className="text-2xl font-semibold mb-3">Loading workspace</h1>
+              <p className="text-gray-600">Loading local application workflow...</p>
+            </div>
+          </div>
+        }
+      >
+        <CareerConsole />
+      </Suspense>
+    )
+  }
+
+  if (isCareerPath(pathname)) {
+    return (
+      <div className="min-h-screen bg-gray-50 text-gray-900 flex items-center justify-center px-4">
+        <div className="max-w-md text-center">
+          <h1 className="text-2xl font-semibold mb-3">Page not found</h1>
+          <p className="text-gray-600">This page is not available.</p>
+        </div>
+      </div>
+    )
+  }
+
+  const version = resumeVersions.find((item) => item.slug === selectedVersion)
+  const data = version?.resume || (lang === 'en' ? resumeEn : resumeZh)
+  const displayLang = version?.resume?.language || lang
 
   const handleDownload = () => {
+    if (version?.pdfPath) {
+      const link = document.createElement('a')
+      link.href = version.pdfPath
+      link.download = `${version.slug}.pdf`
+      link.click()
+      return
+    }
+
     const link = document.createElement('a')
     link.href = '/resume-xiaolei-zhu.pdf'
     link.download = `Xiaolei_Zhu_Resume_${lang.toUpperCase()}.pdf`
@@ -54,6 +101,10 @@ function App() {
           dark={dark} 
           setDark={setDark}
           onDownload={handleDownload}
+          versions={resumeVersions}
+          selectedVersion={selectedVersion}
+          setSelectedVersion={setSelectedVersion}
+          languageDisabled={Boolean(version)}
         />
 
         {/* Profile Section */}
@@ -70,7 +121,7 @@ function App() {
             {data.general.name}
           </h1>
           <p className="text-xl text-gray-600 dark:text-gray-300 text-center mb-4">
-            {lang === 'en' ? 'Application Manager' : '应用经理'} | Guangzhou, China
+            {displayLang === 'en' ? 'Application Manager' : '应用经理'} | Guangzhou, China
           </p>
           
           {/* Contact Info Cards */}

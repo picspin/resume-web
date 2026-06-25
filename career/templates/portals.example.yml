@@ -1,0 +1,81 @@
+title_filter:
+  positive:
+    - "Digital Health"
+    - "Healthcare IT"
+    - "Medical AI"
+    - "Clinical AI"
+    - "Imaging AI"
+    - "Radiology"
+    - "Oncology"
+    - "Product Marketing"
+    - "Product Manager"
+    - "Portfolio Manager"
+    - "External Innovation"
+    - "Search & Evaluation"
+    - "Open Innovation"
+    - "R&D Innovation"
+    - "Clinical Development"
+    - "Clinical Operations"
+    - "Study Start-Up"
+    - "Clinical Modeling"
+    - "Real World Evidence"
+    - "Medical Affairs"
+    - "Evidence Generation"
+    - "Medical Device R&D"
+  negative:
+    - "Intern"
+    - "Junior"
+    - "Nurse"
+    - "Physician"
+    - "CRA"
+    - "CRC"
+    - "Firmware"
+    - "Manufacturing"
+    - "Insurance Claims"
+
+# Medical imaging and device platforms
+company_categories:
+  medical_imaging:
+    - "Siemens Healthineers"
+    - "GE HealthCare"
+    - "Philips"
+    - "Canon Medical"
+    - "United Imaging"
+
+# Radiation oncology and treatment planning
+  radiation_oncology:
+    - "Varian"
+    - "Elekta"
+    - "RaySearch"
+    - "Accuray"
+
+# Pharma R&D and digital development
+  pharma_digital_rd:
+    - "Bayer"
+    - "Roche"
+    - "AstraZeneca"
+    - "Novartis"
+    - "Sanofi"
+    - "Pfizer"
+    - "Johnson & Johnson"
+    - "Eli Lilly"
+    - "AbbVie"
+    - "Astellas"
+
+# Clinical research, RWD, and evidence generation
+  clinical_research_rwd:
+    - "IQVIA"
+    - "ICON"
+    - "Parexel"
+    - "Medidata"
+    - "Veeva"
+
+# Healthcare IT, medical AI, and cloud healthcare platforms
+  healthcare_it:
+    - "Epic"
+    - "Oracle Health"
+    - "athenahealth"
+    - "Allscripts"
+    - "Google Cloud"
+    - "AWS"
+    - "Microsoft"

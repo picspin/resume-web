@@ -1,6 +1,6 @@
 import { Sun, Moon, Download, Globe } from 'lucide-react'
 
-export default function Header({ lang, setLang, dark, setDark, onDownload }) {
+export default function Header({ lang, setLang, dark, setDark, onDownload, versions = [], selectedVersion, setSelectedVersion, languageDisabled = false }) {
   return (
     <div className="flex justify-between items-center mb-8">
       <div className="flex items-center space-x-2">
@@ -9,8 +9,9 @@ export default function Header({ lang, setLang, dark, setDark, onDownload }) {
             lang === 'en' 
               ? 'bg-blue-500 text-white shadow-lg' 
               : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600'
-          }`} 
+          } ${languageDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
           onClick={() => setLang('en')}
+          disabled={languageDisabled}
         >
           <Globe className="w-4 h-4 inline mr-1" />
           EN
@@ -20,8 +21,9 @@ export default function Header({ lang, setLang, dark, setDark, onDownload }) {
             lang === 'zh' 
               ? 'bg-blue-500 text-white shadow-lg' 
               : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600'
-          }`} 
+          } ${languageDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
           onClick={() => setLang('zh')}
+          disabled={languageDisabled}
         >
           <Globe className="w-4 h-4 inline mr-1" />
           中文
@@ -29,6 +31,21 @@ export default function Header({ lang, setLang, dark, setDark, onDownload }) {
       </div>
       
       <div className="flex items-center space-x-2">
+        {versions.length > 0 && (
+          <select
+            className="btn-secondary max-w-48"
+            value={selectedVersion}
+            onChange={(event) => setSelectedVersion(event.target.value)}
+            title={lang === 'en' ? 'Resume version' : '简历版本'}
+          >
+            <option value="default">{lang === 'en' ? 'Default' : '默认'}</option>
+            {versions.map((version) => (
+              <option key={version.slug} value={version.slug}>
+                {version.label}
+              </option>
+            ))}
+          </select>
+        )}
         <button 
           className="btn-secondary"
           onClick={onDownload}

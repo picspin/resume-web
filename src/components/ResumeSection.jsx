@@ -1,5 +1,5 @@
 import { GraduationCap, Briefcase, Code, Trophy, FileText, Award, BadgeCheck, Image as ImageIcon } from 'lucide-react'
-import { useState, useRef, useEffect } from 'react'
+import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 
 const sectionIcons = {
@@ -11,11 +11,6 @@ const sectionIcons = {
   publications: FileText,
   patents: Award,
   posters: ImageIcon
-}
-
-function boldMasterName(text) {
-  if (!text) return '';
-  return text.replace(/(Xiaolei Zhu|Zhu X|Zhu XL)/g, '<span class="font-bold">$1</span>');
 }
 
 // Helper to find the first available image for a project
@@ -49,25 +44,6 @@ if (typeof window !== 'undefined' && !window.__projectImages) {
 export default function ResumeSection({ data }) {
   const [hoveredProject, setHoveredProject] = useState(null);
   const [openedProject, setOpenedProject] = useState(null);
-  const [lineStyle, setLineStyle] = useState({});
-  const [previewPos, setPreviewPos] = useState({});
-  const projectRefs = useRef([]);
-
-  useEffect(() => {
-    if (openedProject !== null && projectRefs.current[openedProject]) {
-      const rect = projectRefs.current[openedProject].getBoundingClientRect();
-      setLineStyle({
-        top: rect.top + window.scrollY + rect.height / 2 - 1,
-        left: rect.right + window.scrollX,
-        width: 0
-      });
-      setPreviewPos({
-        top: rect.top + window.scrollY - 20,
-        left: rect.right + window.scrollX + 60
-      });
-      setTimeout(() => setLineStyle(style => ({ ...style, width: 60 })), 10);
-    }
-  }, [openedProject]);
 
   const handleProjectMouseEnter = (e, i) => setHoveredProject(i);
   const handleProjectMouseLeave = () => setHoveredProject(null);
@@ -176,7 +152,6 @@ export default function ResumeSection({ data }) {
             return (
               <motion.div
                 key={i}
-                ref={el => projectRefs.current[i] = el}
                 className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 flex flex-col md:flex-row items-start gap-4 border border-gray-100 dark:border-gray-700 cursor-pointer"
                 whileHover={{ scale: 1.04, boxShadow: '0 4px 24px rgba(0,0,0,0.12)' }}
                 transition={{ type: 'spring', stiffness: 300, damping: 20 }}
@@ -331,4 +306,4 @@ export default function ResumeSection({ data }) {
       })}
     </div>
   )
-} 
+}

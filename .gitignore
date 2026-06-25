@@ -4,4 +4,5 @@ dist/
 .env*
 .vscode/
 .cursor/
-*.log 
+*.log
+src/data/career-versions.local.json

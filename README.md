@@ -38,3 +38,13 @@ A modern, responsive resume website built with React, Vite, and Tailwind CSS v4.
    ```
 
 ## Project Structure # GitHub Actions Test
+
+## Medical Resume-Ops
+
+This project includes a local `career/` workspace for JD-specific medical/pharma resume adaptation and PDF generation. See `career/README.md` for commands.
+
+## Privacy Boundary
+
+The public resume site defaults to the resume page. The local `/career` console stays disabled unless you are running the Vite dev server and set `VITE_ENABLE_CAREER_CONSOLE=true`.
+
+Keep JD text, truth warnings, evaluation markdown, application links, recruiter messages, and follow-up notes out of public build artifacts. Run `npm run resume:manifest` after local resume generation so `src/data/resume-versions.json` remains public-safe and `src/data/career-versions.local.json` stays local-only and git-ignored.
