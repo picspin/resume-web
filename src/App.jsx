@@ -8,10 +8,6 @@ import ContactInfo from './components/ContactInfo'
 import { isCareerConsoleEnabled, isCareerPath } from './career/careerConsoleEnabled'
 import './App.css'
 
-const shouldLoadCareerConsole =
-  import.meta.env.DEV &&
-  isCareerConsoleEnabled({ env: import.meta.env, pathname: '/career' })
-
 const CareerConsole = import.meta.env.DEV
   ? lazy(() => import('./career/CareerConsole'))
   : null
