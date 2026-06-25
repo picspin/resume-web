@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
+    "lint": "eslint . --ext js,jsx --ignore-pattern dist/ --ignore-pattern node_modules/ --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
     "career:test": "node --test src/career/__tests__/*.test.mjs",
     "resume:manifest": "node scripts/resume-ops/generate-manifest.mjs",
@@ -28,15 +28,22 @@
     "@tailwindcss/postcss": "^4.1.10",
     "@types/react": "^18.2.15",
     "@types/react-dom": "^18.2.7",
-    "@vitejs/plugin-react": "^4.0.3",
+    "@vitejs/plugin-react": "^4.7.0",
     "autoprefixer": "^10.4.14",
     "eslint": "^8.45.0",
     "eslint-plugin-react": "^7.32.2",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.3",
     "playwright": "^1.61.1",
-    "postcss": "^8.4.27",
+    "postcss": "^8.5.15",
     "tailwindcss": "^4.0.0",
-    "vite": "^4.4.5"
+    "vite": "^6.4.3"
+  },
+  "overrides": {
+    "ajv": "6.15.0",
+    "brace-expansion": "1.1.13",
+    "flatted": "3.4.2",
+    "minimatch": "3.1.5",
+    "tar": "7.5.17"
   }
 }

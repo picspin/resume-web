@@ -22,6 +22,7 @@ function isSafeUrl(value) {
     return true
   }
 
+  // eslint-disable-next-line no-control-regex -- Strip encoded/control whitespace before URL scheme checks.
   const normalized = trimmed.replaceAll(/[\u0000-\u001f\u007f\s]+/g, '').toLowerCase()
   const schemeMatch = normalized.match(/^([a-z][a-z0-9+.-]*):/)
 
