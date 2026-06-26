@@ -2,16 +2,19 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import fs from 'node:fs/promises'
 import path from 'node:path'
-import os from 'node:os'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { build } from 'esbuild'
+import React from 'react'
+import { renderToStaticMarkup } from 'react-dom/server'
 
 const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..', '..')
 
 async function importJsxModule(relativePath) {
   const entryPoint = path.join(projectRoot, relativePath)
+  const outdir = path.join(projectRoot, '.tmp-career-tests')
+  await fs.mkdir(outdir, { recursive: true })
   const outfile = path.join(
-    os.tmpdir(),
+    outdir,
     `career-test-${path.basename(relativePath, path.extname(relativePath))}-${Date.now()}-${Math.random().toString(16).slice(2)}.mjs`,
   )
 
@@ -23,6 +26,7 @@ async function importJsxModule(relativePath) {
     platform: 'node',
     jsx: 'automatic',
     absWorkingDir: projectRoot,
+    external: ['react', 'react-dom', 'react-dom/server', 'react/jsx-runtime'],
     loader: {
       '.js': 'js',
       '.jsx': 'jsx',
@@ -70,6 +74,15 @@ test('loadCareerConsoleState clears loading and surfaces a compact error on load
   assert.equal(result.loading, false)
   assert.deepEqual(result.careerVersions, [])
   assert.match(result.loadError, /unable to load/i)
+})
+
+test('CareerConsole renders the local Portfolio Studio entry point', async () => {
+  const { default: CareerConsole } = await importJsxModule('src/career/CareerConsole.jsx')
+  const html = renderToStaticMarkup(React.createElement(CareerConsole))
+
+  assert.match(html, /Portfolio Studio/)
+  assert.match(html, /review payload/i)
+  assert.match(html, /No files are changed/i)
 })
 
 test('ApplicationBoard row button selection calls onSelect with the row slug', async () => {

@@ -13,6 +13,11 @@ const forbiddenMarkers = [
   'Career Console',
   'Application Board',
   'Manual Apply Pack',
+  'Portfolio Studio',
+  'Project and skills draft builder',
+  'resumeOps.portfolioDrafts.v1',
+  'review payload',
+  'No files are changed',
   'career-versions.local.json',
   'VITE_ENABLE_CAREER_CONSOLE',
 ]

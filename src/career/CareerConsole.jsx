@@ -7,6 +7,7 @@ import ApplicationBoard from './ApplicationBoard'
 import EvidenceReview from './EvidenceReview'
 import ApplyPack from './ApplyPack'
 import JdIntakeHelper from './JdIntakeHelper'
+import PortfolioStudio from './PortfolioStudio'
 
 export async function loadCareerConsoleState(loadVersions = loadCareerVersions) {
   try {
@@ -93,6 +94,8 @@ export default function CareerConsole() {
             <div className="text-sm text-gray-600">Submit gate</div>
           </div>
         </section>
+
+        <PortfolioStudio />
 
         {loading ? (
           <section className="rounded-lg border border-dashed border-gray-300 bg-white p-5 text-sm text-gray-600">

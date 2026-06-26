@@ -5,4 +5,5 @@ dist/
 .vscode/
 .cursor/
 *.log
+.tmp-career-tests/
 src/data/career-versions.local.json
