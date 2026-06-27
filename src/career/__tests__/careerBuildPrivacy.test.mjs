@@ -18,6 +18,8 @@ const forbiddenMarkers = [
   'resumeOps.portfolioDrafts.v1',
   'review payload',
   'No files are changed',
+  'Open local Career Console',
+  'BriefcaseBusiness',
   'career-versions.local.json',
   'VITE_ENABLE_CAREER_CONSOLE',
 ]

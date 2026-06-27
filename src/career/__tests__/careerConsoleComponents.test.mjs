@@ -167,3 +167,13 @@ test('EvidenceReview keeps markdown formatting but does not render raw HTML from
   assert.match(html, /&lt;script&gt;alert\(&quot;xss&quot;\)&lt;\/script&gt;/i)
   assert.match(html, /&lt;img src=x onerror=&quot;alert\(1\)&quot;&gt;/i)
 })
+
+test('CareerEntry links the local homepage to the Career Console', async () => {
+  const { default: CareerEntry } = await importJsxModule('src/career/CareerEntry.jsx')
+  const tree = CareerEntry()
+  const links = findElements(tree, (node) => node.type === 'a')
+
+  assert.equal(links.length, 1)
+  assert.equal(links[0].props.href, '/career')
+  assert.match(String(links[0].props.children), /Career Console/)
+})
