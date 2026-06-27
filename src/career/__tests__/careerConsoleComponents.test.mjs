@@ -58,6 +58,109 @@ function findElements(node, predicate, matches = []) {
   return matches
 }
 
+function textContent(value) {
+  if (Array.isArray(value)) {
+    return value.map(textContent).join('')
+  }
+  if (!value || typeof value === 'boolean') {
+    return ''
+  }
+  if (typeof value === 'string' || typeof value === 'number') {
+    return String(value)
+  }
+  return textContent(value.props?.children)
+}
+
+function renderWithHookDispatcher(Component, props = {}) {
+  const internals = React.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED
+  const dispatcherRef = internals.ReactCurrentDispatcher
+  const hookState = []
+
+  const render = () => {
+    let hookIndex = 0
+    const dispatcher = {
+      useState(initialValue) {
+        const index = hookIndex++
+        if (!(index in hookState)) {
+          hookState[index] = typeof initialValue === 'function' ? initialValue() : initialValue
+        }
+
+        const setState = (nextValue) => {
+          hookState[index] = typeof nextValue === 'function' ? nextValue(hookState[index]) : nextValue
+        }
+
+        return [hookState[index], setState]
+      },
+      useMemo(factory) {
+        hookIndex++
+        return factory()
+      },
+      useEffect() {
+        hookIndex++
+      },
+      useCallback(callback) {
+        hookIndex++
+        return callback
+      },
+      useRef(initialValue) {
+        hookIndex++
+        return { current: initialValue }
+      },
+      useContext(context) {
+        hookIndex++
+        return context._currentValue
+      },
+      useReducer(reducer, initialArg, init) {
+        const index = hookIndex++
+        if (!(index in hookState)) {
+          hookState[index] = typeof init === 'function' ? init(initialArg) : initialArg
+        }
+
+        const dispatch = (action) => {
+          hookState[index] = reducer(hookState[index], action)
+        }
+
+        return [hookState[index], dispatch]
+      },
+      useLayoutEffect() {
+        hookIndex++
+      },
+      useInsertionEffect() {
+        hookIndex++
+      },
+      useImperativeHandle() {
+        hookIndex++
+      },
+      useDeferredValue(value) {
+        hookIndex++
+        return value
+      },
+      useTransition() {
+        hookIndex++
+        return [false, () => {}]
+      },
+      useId() {
+        hookIndex++
+        return `test-id-${hookIndex}`
+      },
+      useSyncExternalStore(subscribe, getSnapshot) {
+        hookIndex++
+        return getSnapshot()
+      },
+    }
+
+    const previousDispatcher = dispatcherRef.current
+    dispatcherRef.current = dispatcher
+    try {
+      return Component(props)
+    } finally {
+      dispatcherRef.current = previousDispatcher
+    }
+  }
+
+  return { render }
+}
+
 test('careerConsoleComponents test derives project root instead of hard-coding a worktree path', async () => {
   const source = await fs.readFile(new URL(import.meta.url), 'utf8')
 
@@ -117,6 +220,38 @@ test('CareerConsole renders the resume preview workspace', async () => {
 
   assert.match(html, /Resume Preview/)
   assert.match(html, /Generate a portfolio draft to preview it in the live resume layout/)
+})
+
+test('PortfolioStudio calls onDraftChange when generating and clearing a draft', async () => {
+  const { default: PortfolioStudio } = await importJsxModule('src/career/PortfolioStudio.jsx')
+  const changes = []
+  const onDraftChange = (draft) => {
+    changes.push(draft)
+  }
+  const { render } = renderWithHookDispatcher(PortfolioStudio, { onDraftChange })
+
+  let tree = render()
+  const titleInput = findElements(tree, (node) => node.type === 'input' && node.props?.placeholder === 'Radiology RAG Enablement')[0]
+  const rawEvidenceInput = findElements(
+    tree,
+    (node) => node.type === 'textarea' && node.props?.placeholder === 'What you built, medical context, users, workflow, tools, outcomes, and proof.',
+  )[0]
+
+  titleInput.props.onChange({ target: { value: 'Radiology RAG Enablement' } })
+  rawEvidenceInput.props.onChange({ target: { value: 'Built a RAG workflow for imaging notes.' } })
+
+  tree = render()
+  const generateButton = findElements(tree, (node) => node.type === 'button' && textContent(node.props.children).includes('Generate draft'))[0]
+  const clearButton = findElements(tree, (node) => node.type === 'button' && textContent(node.props.children) === 'Clear')[0]
+
+  generateButton.props.onClick()
+  assert.equal(changes.length, 1)
+  assert.equal(changes[0].input.title, 'Radiology RAG Enablement')
+  assert.match(changes[0].input.rawText, /imaging notes/)
+
+  clearButton.props.onClick()
+  assert.equal(changes.length, 2)
+  assert.equal(changes[1], null)
 })
 
 test('ApplicationBoard row button selection calls onSelect with the row slug', async () => {

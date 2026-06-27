@@ -24,6 +24,7 @@ const forbiddenMarkers = [
   'Generate a portfolio draft to preview it in the live resume layout',
   'Open local Career Console',
   'BriefcaseBusiness',
+  'This is an in-memory preview only. Source resume files are unchanged.',
   'career-versions.local.json',
   'VITE_ENABLE_CAREER_CONSOLE',
 ]

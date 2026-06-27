@@ -73,3 +73,17 @@ Self-review notes
 
 Concerns
 - None.
+
+---
+
+Review fix notes
+- Added the literal in-memory preview warning string to the production privacy forbidden-marker set.
+- Added a focused `PortfolioStudio` behavior test that uses the existing `findElements` helper and a test hook dispatcher to verify `onDraftChange` receives a draft on generate and `null` on clear.
+
+Tests run
+- `node --test /private/tmp/resume-web-worktrees/codex/portfolio-studio/src/career/__tests__/careerBuildPrivacy.test.mjs` — passed
+- `node --test /private/tmp/resume-web-worktrees/codex/portfolio-studio/src/career/__tests__/careerConsoleComponents.test.mjs` — passed
+- `npm run career:test` — passed (35 tests)
+
+Code/test commit hash
+- `95b0b3d`
