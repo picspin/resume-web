@@ -222,6 +222,17 @@ test('CareerConsole renders the resume preview workspace', async () => {
 
   assert.match(html, /Resume Preview/)
   assert.match(html, /Generate a portfolio draft to preview it in the live resume layout/)
+  assert.match(html, /No tailored resume versions loaded yet/i)
+})
+
+test('JdIntakeHelper renders a visual JD workflow with generated commands', async () => {
+  const { default: JdIntakeHelper } = await importJsxModule('src/career/JdIntakeHelper.jsx')
+  const html = renderToStaticMarkup(React.createElement(JdIntakeHelper, { selectedSlug: 'medical-ai-lead' }))
+
+  assert.match(html, /JD Workflow/)
+  assert.match(html, /career\/jds\/medical-ai-lead.md/)
+  assert.match(html, /npm run resume:adapt -- --jd career\/jds\/medical-ai-lead.md --slug medical-ai-lead/)
+  assert.match(html, /Manual command step/)
 })
 
 test('PortfolioStudio calls onDraftChange when generating and clearing a draft', async () => {

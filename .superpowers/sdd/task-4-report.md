@@ -103,3 +103,30 @@ GREEN evidence:
 - `node --test src/career/__tests__/careerConsoleComponents.test.mjs src/career/__tests__/careerBuildPrivacy.test.mjs` — passed, 8/8 tests green after the fix.
 - `npm run career:test` — passed, 20 tests green total.
 - `npm run build` — passed, default production build completed successfully.
+
+Task 4 append report:
+
+Status:
+- DONE
+
+Files changed:
+- `src/career/JdIntakeHelper.jsx`
+- `src/career/CareerConsole.jsx`
+- `src/career/__tests__/careerConsoleComponents.test.mjs`
+- `src/career/__tests__/careerBuildPrivacy.test.mjs`
+- `.superpowers/sdd/task-4-report.md`
+
+Tests run, with pass/fail result and short output summary:
+- `npm run career:test` — FAIL; 35 passed / 2 failed. Expected red phase: `CareerConsole renders the resume preview workspace` still showed the loading state, and `JdIntakeHelper renders a visual JD workflow with generated commands` still rendered `JD Intake Helper` instead of `JD Workflow`.
+- `npm run career:test` — PASS; 37 passed / 0 failed. Verified the new JD workflow UI markers, updated empty-state copy, and default production build privacy coverage.
+
+Commit hash(es):
+- `499cbad feat: add visual jd workflow`
+
+Self-review notes:
+- Kept the workflow manual-only: the browser only derives path text and copyable commands, and it never writes `career/jds/*.md` or executes shell commands.
+- The helper keeps JD text in component state only, so source resume JSON and persisted local data remain untouched.
+- Added production-bundle privacy markers so the default build regression test explicitly blocks JD workflow strings from shipping.
+
+Concerns:
+- The SSR-oriented component test now relies on `CareerConsole` starting with `loading=false` outside the browser so the empty-state copy remains observable during static rendering; browser behavior still enters the async load path because `window` is defined there.

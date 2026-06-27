@@ -27,6 +27,10 @@ const forbiddenMarkers = [
   'This is an in-memory preview only. Source resume files are unchanged.',
   'career-versions.local.json',
   'VITE_ENABLE_CAREER_CONSOLE',
+  'JD Workflow',
+  'Manual command step',
+  'career/jds/',
+  'npm run resume:adapt',
 ]
 
 async function collectFiles(rootDir) {

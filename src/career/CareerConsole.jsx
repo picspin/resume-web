@@ -32,7 +32,7 @@ export default function CareerConsole() {
   const { applicationState, updateRecord } = useApplicationState()
   const [careerVersions, setCareerVersions] = useState([])
   const [loadError, setLoadError] = useState('')
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(typeof window !== 'undefined')
   const [portfolioDraft, setPortfolioDraft] = useState(null)
 
   useEffect(() => {
@@ -115,7 +115,9 @@ export default function CareerConsole() {
         ) : rows.length === 0 ? (
           <div className="space-y-4">
             <section className="rounded-lg border border-gray-200 bg-white p-5 text-sm text-gray-600">
-              {loadError || 'No local career versions loaded yet. Generate or sync a local version to populate the console.'}
+              {loadError
+                ? 'No tailored resume versions loaded yet. Use the JD Workflow below to prepare one, or generate a Portfolio Studio draft for preview.'
+                : 'No tailored resume versions loaded yet. Generate a local version when you are ready to create a PDF/application pack.'}
             </section>
             <JdIntakeHelper />
           </div>
