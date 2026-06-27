@@ -77,6 +77,15 @@ Concerns
 ---
 
 Review fix notes
+- Replaced the inline `() => {}` default for `onDraftChange` with a module-level `noopDraftChange` so the `useEffect` dependency stays stable when no callback prop is passed.
+- Added a focused regression test that renders `PortfolioStudio` twice with the hook test dispatcher and asserts the `onDraftChange` dependency is the same function reference across renders.
+
+Tests run
+- `npm run career:test` — passed
+
+---
+
+Review fix notes
 - Added the literal in-memory preview warning string to the production privacy forbidden-marker set.
 - Added a focused `PortfolioStudio` behavior test that uses the existing `findElements` helper and a test hook dispatcher to verify `onDraftChange` receives a draft on generate and `null` on clear.
 

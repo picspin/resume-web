@@ -75,6 +75,7 @@ function renderWithHookDispatcher(Component, props = {}) {
   const internals = React.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED
   const dispatcherRef = internals.ReactCurrentDispatcher
   const hookState = []
+  const effectDeps = []
 
   const render = () => {
     let hookIndex = 0
@@ -95,8 +96,9 @@ function renderWithHookDispatcher(Component, props = {}) {
         hookIndex++
         return factory()
       },
-      useEffect() {
+      useEffect(effect, deps) {
         hookIndex++
+        effectDeps.push(deps)
       },
       useCallback(callback) {
         hookIndex++
@@ -158,7 +160,7 @@ function renderWithHookDispatcher(Component, props = {}) {
     }
   }
 
-  return { render }
+  return { render, effectDeps }
 }
 
 test('careerConsoleComponents test derives project root instead of hard-coding a worktree path', async () => {
@@ -252,6 +254,17 @@ test('PortfolioStudio calls onDraftChange when generating and clearing a draft',
   clearButton.props.onClick()
   assert.equal(changes.length, 2)
   assert.equal(changes[1], null)
+})
+
+test('PortfolioStudio keeps the default onDraftChange dependency stable across renders', async () => {
+  const { default: PortfolioStudio } = await importJsxModule('src/career/PortfolioStudio.jsx')
+  const { render, effectDeps } = renderWithHookDispatcher(PortfolioStudio)
+
+  render()
+  render()
+
+  assert.equal(effectDeps.length >= 2, true)
+  assert.strictEqual(effectDeps[0][0], effectDeps[1][0])
 })
 
 test('ApplicationBoard row button selection calls onSelect with the row slug', async () => {

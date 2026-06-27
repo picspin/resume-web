@@ -17,6 +17,8 @@ const EMPTY_FORM = {
   jdText: '',
 }
 
+const noopDraftChange = () => {}
+
 function readPortfolioDraft() {
   if (typeof window === 'undefined') return null
   try {
@@ -57,7 +59,7 @@ async function copyToClipboard(text) {
   }
 }
 
-export default function PortfolioStudio({ onDraftChange = () => {} }) {
+export default function PortfolioStudio({ onDraftChange = noopDraftChange }) {
   const [form, setForm] = useState(EMPTY_FORM)
   const [draft, setDraft] = useState(null)
   const [copied, setCopied] = useState('')
