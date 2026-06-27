@@ -667,7 +667,7 @@ git commit -m "feat: add visual jd workflow"
 - Consumes implemented UI from Tasks 1-4.
 - Produces updated local usage docs and verified branch state.
 
-- [ ] **Step 1: Update README**
+- [x] **Step 1: Update README**
 
 In `career/README.md`, add a `WYSIWYG Preview` subsection under Portfolio Studio:
 
@@ -679,7 +679,7 @@ When `VITE_ENABLE_CAREER_CONSOLE=true` is set in local dev, the homepage shows a
 This preview is not a publish action. It does not write `src/data/resume-en.json`, does not write `src/data/resume-zh.json`, does not save JD files, and does not run shell commands. Use the visual JD Workflow to prepare the target `career/jds/<slug>.md` path and copy the existing resume-ops commands when you are ready to generate PDFs and manifests.
 ```
 
-- [ ] **Step 2: Run full verification**
+- [x] **Step 2: Run full verification**
 
 Run:
 
@@ -695,7 +695,7 @@ Expected:
 - `npm run career:test`: all tests pass.
 - `npm run build`: exit 0; default production build does not expose `/career` implementation details.
 
-- [ ] **Step 3: Browser smoke check**
+- [x] **Step 3: Browser smoke check**
 
 Start server if needed:
 
@@ -708,14 +708,14 @@ Run a Playwright smoke check that confirms:
 - `http://127.0.0.1:5173/` includes `Career Console`.
 - `http://127.0.0.1:5173/career` includes `Portfolio Studio`, `Resume Preview`, `JD Workflow`, and `Generate draft`.
 
-- [ ] **Step 4: Commit docs**
+- [x] **Step 4: Commit docs**
 
 ```bash
 git add career/README.md docs/superpowers/plans/2026-06-27-career-wysiwyg-implementation.md
 git commit -m "docs: document career wysiwyg workflow"
 ```
 
-- [ ] **Step 5: Final branch review and push**
+- [x] **Step 5: Final branch review and push**
 
 Run:
 

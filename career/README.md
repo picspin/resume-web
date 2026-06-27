@@ -64,4 +64,10 @@ The MVP intentionally does not call an external AI API, edit `src/data/resume-en
 
 Portfolio Studio keeps the last form and draft in browser `localStorage` on the local machine only. This can include JD excerpts and project evidence, so clear it after sensitive drafting sessions.
 
+### WYSIWYG Preview
+
+When `VITE_ENABLE_CAREER_CONSOLE=true` is set in local dev, the homepage shows a `Career Console` entry. Inside `/career`, Portfolio Studio can generate an in-memory resume preview that renders through the same web resume layout used by `picspin.github.io`.
+
+This preview is not a publish action. It does not write `src/data/resume-en.json`, does not write `src/data/resume-zh.json`, does not save JD files, and does not run shell commands. Use the visual JD Workflow to prepare the target `career/jds/<slug>.md` path and copy the existing resume-ops commands when you are ready to generate PDFs and manifests.
+
 Project images should stay under `public/images/projects/` and be referenced from the web resume with public paths such as `/images/projects/project-24.jpg`. Use an existing reviewed project image while a new visual asset is still being prepared.
