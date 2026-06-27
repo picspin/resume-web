@@ -11,6 +11,9 @@ import './App.css'
 const CareerConsole = import.meta.env.DEV
   ? lazy(() => import('./career/CareerConsole'))
   : null
+const CareerEntry = import.meta.env.DEV
+  ? lazy(() => import('./career/CareerEntry'))
+  : null
 
 function App() {
   const [lang, setLang] = useState('en')
@@ -31,6 +34,7 @@ function App() {
 
   const pathname = window.location.pathname
   const careerEnabled = isCareerConsoleEnabled({ env: import.meta.env, pathname })
+  const careerConsoleAvailable = isCareerConsoleEnabled({ env: import.meta.env, pathname: '/career' })
 
   if (careerEnabled && CareerConsole) {
     return (
@@ -106,6 +110,14 @@ function App() {
           setSelectedVersion={setSelectedVersion}
           languageDisabled={Boolean(version)}
         />
+
+        {careerConsoleAvailable && CareerEntry && !isCareerPath(pathname) && (
+          <div className="mb-6 flex justify-end">
+            <Suspense fallback={null}>
+              <CareerEntry />
+            </Suspense>
+          </div>
+        )}
 
         {/* Profile Section */}
         <div className="flex flex-col items-center mb-8">

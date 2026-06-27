@@ -42,3 +42,32 @@ Important privacy boundary:
 - The detailed local manifest is generated at `src/data/career-versions.local.json`, fetched only from the local dev server, and ignored by git.
 - The public manifest is `src/data/resume-versions.json`. It is safe for the public app and must not include truth warnings, evaluation markdown, JD text, or application notes.
 - External PDFs are for application materials. Truth warnings remain review-only and should be checked in `/career`, not shared with recruiters or pasted into public artifacts.
+
+## Portfolio Studio
+
+Portfolio Studio lives inside the same local `/career` console. It is for semi-automated project and skills drafting before a human-approved update to the public web resume.
+
+Use it when you have a new GitHub project, medical device/digital health project, or JD-specific evidence that should be considered for `picspin.github.io`:
+
+1. Start the local console:
+   ```bash
+   VITE_ENABLE_CAREER_CONSOLE=true npm run dev -- --host 127.0.0.1
+   ```
+2. Open `http://127.0.0.1:5173/career`.
+3. In Portfolio Studio, enter the project title, role/date, GitHub URL, image path, concrete project evidence, and optional JD excerpt.
+4. Click `Generate draft`.
+5. Review the generated web project draft, resume bullet, skill suggestions, AI polish prompt, and review payload.
+6. Copy the prompt or review payload only after checking that the claims match real evidence.
+7. Use `Clear` when you want to remove the saved Portfolio Studio form and draft from browser local storage.
+
+The MVP intentionally does not call an external AI API, edit `src/data/resume-en.json`, edit `src/data/resume-zh.json`, publish the site, or submit applications. It creates local review material so the final resume and application flow still has a manual approval gate.
+
+Portfolio Studio keeps the last form and draft in browser `localStorage` on the local machine only. This can include JD excerpts and project evidence, so clear it after sensitive drafting sessions.
+
+### WYSIWYG Preview
+
+When `VITE_ENABLE_CAREER_CONSOLE=true` is set in local dev, the homepage shows a `Career Console` entry. Inside `/career`, Portfolio Studio can generate an in-memory resume preview that renders through the same web resume layout used by `picspin.github.io`.
+
+This preview is not a publish action. It does not write `src/data/resume-en.json`, does not write `src/data/resume-zh.json`, does not save JD files, and does not run shell commands. Use the visual JD Workflow to prepare the target `career/jds/<slug>.md` path and copy the existing resume-ops commands when you are ready to generate PDFs and manifests.
+
+Project images should stay under `public/images/projects/` and be referenced from the web resume with public paths such as `/images/projects/project-24.jpg`. Use an existing reviewed project image while a new visual asset is still being prepared.

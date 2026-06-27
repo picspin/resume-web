@@ -1,12 +1,16 @@
 import { useEffect, useMemo, useState } from 'react'
 import { ClipboardList, FileText, Send, ShieldCheck } from 'lucide-react'
+import resumeEn from '../data/resume-en.json'
 import { loadCareerVersions } from './careerData'
 import { deriveCareerRows } from './careerRows'
+import { buildResumePreview } from './portfolioPreview'
 import { useApplicationState } from './useApplicationState'
 import ApplicationBoard from './ApplicationBoard'
 import EvidenceReview from './EvidenceReview'
 import ApplyPack from './ApplyPack'
 import JdIntakeHelper from './JdIntakeHelper'
+import PortfolioStudio from './PortfolioStudio'
+import ResumePreview from './ResumePreview'
 
 export async function loadCareerConsoleState(loadVersions = loadCareerVersions) {
   try {
@@ -28,7 +32,8 @@ export default function CareerConsole() {
   const { applicationState, updateRecord } = useApplicationState()
   const [careerVersions, setCareerVersions] = useState([])
   const [loadError, setLoadError] = useState('')
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(typeof window !== 'undefined')
+  const [portfolioDraft, setPortfolioDraft] = useState(null)
 
   useEffect(() => {
     let active = true
@@ -47,6 +52,10 @@ export default function CareerConsole() {
   const rows = useMemo(
     () => deriveCareerRows({ versions: careerVersions, applicationState }),
     [careerVersions, applicationState],
+  )
+  const resumePreview = useMemo(
+    () => buildResumePreview(resumeEn, portfolioDraft),
+    [portfolioDraft],
   )
   const [selectedSlug, setSelectedSlug] = useState(rows[0]?.slug || '')
   const selected = rows.find((row) => row.slug === selectedSlug) || rows[0]
@@ -94,6 +103,11 @@ export default function CareerConsole() {
           </div>
         </section>
 
+        <PortfolioStudio onDraftChange={setPortfolioDraft} />
+        <div className="mb-6">
+          <ResumePreview preview={portfolioDraft ? resumePreview : null} />
+        </div>
+
         {loading ? (
           <section className="rounded-lg border border-dashed border-gray-300 bg-white p-5 text-sm text-gray-600">
             Loading local career versions...
@@ -101,7 +115,9 @@ export default function CareerConsole() {
         ) : rows.length === 0 ? (
           <div className="space-y-4">
             <section className="rounded-lg border border-gray-200 bg-white p-5 text-sm text-gray-600">
-              {loadError || 'No local career versions loaded yet. Generate or sync a local version to populate the console.'}
+              {loadError
+                ? 'No tailored resume versions loaded yet. Use the JD Workflow below to prepare one, or generate a Portfolio Studio draft for preview.'
+                : 'No tailored resume versions loaded yet. Generate a local version when you are ready to create a PDF/application pack.'}
             </section>
             <JdIntakeHelper />
           </div>
