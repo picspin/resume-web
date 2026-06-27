@@ -1,13 +1,16 @@
 import { useEffect, useMemo, useState } from 'react'
 import { ClipboardList, FileText, Send, ShieldCheck } from 'lucide-react'
+import resumeEn from '../data/resume-en.json'
 import { loadCareerVersions } from './careerData'
 import { deriveCareerRows } from './careerRows'
+import { buildResumePreview } from './portfolioPreview'
 import { useApplicationState } from './useApplicationState'
 import ApplicationBoard from './ApplicationBoard'
 import EvidenceReview from './EvidenceReview'
 import ApplyPack from './ApplyPack'
 import JdIntakeHelper from './JdIntakeHelper'
 import PortfolioStudio from './PortfolioStudio'
+import ResumePreview from './ResumePreview'
 
 export async function loadCareerConsoleState(loadVersions = loadCareerVersions) {
   try {
@@ -30,6 +33,7 @@ export default function CareerConsole() {
   const [careerVersions, setCareerVersions] = useState([])
   const [loadError, setLoadError] = useState('')
   const [loading, setLoading] = useState(true)
+  const [portfolioDraft, setPortfolioDraft] = useState(null)
 
   useEffect(() => {
     let active = true
@@ -48,6 +52,10 @@ export default function CareerConsole() {
   const rows = useMemo(
     () => deriveCareerRows({ versions: careerVersions, applicationState }),
     [careerVersions, applicationState],
+  )
+  const resumePreview = useMemo(
+    () => buildResumePreview(resumeEn, portfolioDraft),
+    [portfolioDraft],
   )
   const [selectedSlug, setSelectedSlug] = useState(rows[0]?.slug || '')
   const selected = rows.find((row) => row.slug === selectedSlug) || rows[0]
@@ -95,7 +103,10 @@ export default function CareerConsole() {
           </div>
         </section>
 
-        <PortfolioStudio />
+        <PortfolioStudio onDraftChange={setPortfolioDraft} />
+        <div className="mb-6">
+          <ResumePreview preview={portfolioDraft ? resumePreview : null} />
+        </div>
 
         {loading ? (
           <section className="rounded-lg border border-dashed border-gray-300 bg-white p-5 text-sm text-gray-600">

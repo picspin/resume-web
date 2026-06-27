@@ -85,6 +85,40 @@ test('CareerConsole renders the local Portfolio Studio entry point', async () =>
   assert.match(html, /No files are changed/i)
 })
 
+test('ResumePreview renders draft bullets and resume layout sections', async () => {
+  const { default: ResumePreview } = await importJsxModule('src/career/ResumePreview.jsx')
+  const preview = {
+    resume: {
+      education: [],
+      work: [],
+      skills: ['Medical AI & Digital Health: LLM/RAG workflow design.'],
+      certificates: [],
+      projects: [{ title: 'Radiology RAG Enablement', description: 'Solution owner.', image: '/images/projects/project-1.jpg' }],
+      publications: [],
+      posters: [],
+      patents: [],
+    },
+    metadata: {
+      resumeBullets: ['Radiology RAG Enablement: Solution owner.'],
+      warnings: [],
+      reviewOnly: true,
+    },
+  }
+  const html = renderToStaticMarkup(React.createElement(ResumePreview, { preview }))
+
+  assert.match(html, /Resume Preview/)
+  assert.match(html, /Radiology RAG Enablement/)
+  assert.match(html, /Draft bullets/)
+})
+
+test('CareerConsole renders the resume preview workspace', async () => {
+  const { default: CareerConsole } = await importJsxModule('src/career/CareerConsole.jsx')
+  const html = renderToStaticMarkup(React.createElement(CareerConsole))
+
+  assert.match(html, /Resume Preview/)
+  assert.match(html, /Generate a portfolio draft to preview it in the live resume layout/)
+})
+
 test('ApplicationBoard row button selection calls onSelect with the row slug', async () => {
   const { default: ApplicationBoard } = await importJsxModule('src/career/ApplicationBoard.jsx')
   const rows = [

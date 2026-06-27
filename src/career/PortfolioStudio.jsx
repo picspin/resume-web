@@ -57,7 +57,7 @@ async function copyToClipboard(text) {
   }
 }
 
-export default function PortfolioStudio() {
+export default function PortfolioStudio({ onDraftChange = () => {} }) {
   const [form, setForm] = useState(EMPTY_FORM)
   const [draft, setDraft] = useState(null)
   const [copied, setCopied] = useState('')
@@ -65,8 +65,11 @@ export default function PortfolioStudio() {
   useEffect(() => {
     const saved = readPortfolioDraft()
     if (saved?.form) setForm({ ...EMPTY_FORM, ...saved.form })
-    if (saved?.draft) setDraft(saved.draft)
-  }, [])
+    if (saved?.draft) {
+      setDraft(saved.draft)
+      onDraftChange(saved.draft)
+    }
+  }, [onDraftChange])
 
   const jsonPatchText = useMemo(() => {
     if (!draft) return ''
@@ -80,12 +83,14 @@ export default function PortfolioStudio() {
   const generateDraft = () => {
     const nextDraft = buildPortfolioDraft(form)
     setDraft(nextDraft)
+    onDraftChange(nextDraft)
     writePortfolioDraft({ form, draft: nextDraft, updatedAt: new Date().toISOString() })
   }
 
   const resetDraft = () => {
     setForm(EMPTY_FORM)
     setDraft(null)
+    onDraftChange(null)
     setCopied('Local draft cleared')
     clearPortfolioDraft()
   }
