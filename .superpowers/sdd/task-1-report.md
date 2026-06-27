@@ -1,30 +1,42 @@
+# Task 1 Report
+
 Status: DONE
 
 Files changed:
-- src/career/portfolioPreview.js
-- src/career/__tests__/portfolioPreview.test.mjs
+- `package.json`
+- `src/App.jsx`
+- `src/career/careerConsoleEnabled.js`
+- `src/career/CareerConsole.jsx`
+- `src/career/__tests__/careerConsoleEnabled.test.mjs`
 
-Tests run:
-- `node --test src/career/__tests__/portfolioPreview.test.mjs` - FAIL as expected on the first run with `ERR_MODULE_NOT_FOUND` for `src/career/portfolioPreview.js`.
-- `node --test src/career/__tests__/portfolioPreview.test.mjs` - PASS, 3 tests passed.
+Commands run and results:
+- `node --test /private/tmp/resume-web-worktrees/codex/medical-resume-ops/src/career/__tests__/careerConsoleEnabled.test.mjs`
+  - Result: failed first with `ERR_MODULE_NOT_FOUND` for `src/career/careerConsoleEnabled.js`, then passed after implementation.
+- `npm run career:test`
+  - Result: passed.
+- `npm run build`
+  - Result: passed.
+- `git add package.json src/App.jsx src/career/careerConsoleEnabled.js src/career/CareerConsole.jsx src/career/__tests__/careerConsoleEnabled.test.mjs && git commit -m "feat: gate local career console route"`
+  - Result: commit created successfully.
 
-Commit hash(es):
-- `02eb07144c70e66c118dc45e987223eaeb80e650`
+Commits created:
+- `6e26e1f` - `feat: gate local career console route`
 
 Self-review notes:
-- The helper stays pure and does not mutate `baseResume`.
-- The merge behavior follows the draft shape from `buildPortfolioDraft`, including review-only metadata and unique skill ordering.
+- The change is scoped to Task 1 only: gate helpers, route wiring, placeholder console, test coverage, and the package script.
+- `App.jsx` returns the career placeholder or local-only notice before falling through to the resume UI.
+- Build succeeds without any `VITE_ENABLE_CAREER_CONSOLE` setting.
+- No concerns beyond the expected Vite Browserslist freshness warning during build.
 
-Concerns:
-- None.
+Follow-up fix for review findings:
+- `isCareerConsoleEnabled` now requires `env.DEV === true` in addition to the pathname and explicit flag, so production builds cannot unlock `/career` by setting `VITE_ENABLE_CAREER_CONSOLE`.
+- `App.jsx` now lazy-loads `CareerConsole` behind the gate instead of importing it eagerly at module load, keeping the default resume route free of the local career UI bundle.
+- The gate tests now lock in both the dev-mode requirement and the disabled behavior when `DEV` is absent or false.
 
-Task 1 review fix:
-- Cloned `draft.webProject` before appending it to `resume.projects`, so edits to the preview project no longer flow back into the draft object.
-- Hardened `appendUniqueSkills` so `null` and other non-array inputs are treated as empty arrays.
-- Extended coverage with a mutation check on `preview.resume.projects[1]` and a null-input skill merge case.
-
-Tests run:
-- `node --test src/career/__tests__/portfolioPreview.test.mjs`
-
-Commit hash:
-- pending
+Validation after the fix:
+- `node --test /private/tmp/resume-web-worktrees/codex/medical-resume-ops/src/career/__tests__/careerConsoleEnabled.test.mjs`
+  - Result: passed.
+- `npm run career:test`
+  - Result: passed.
+- `npm run build`
+  - Result: passed, and `CareerConsole` is emitted as its own lazy chunk.
