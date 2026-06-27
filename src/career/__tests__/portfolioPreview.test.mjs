@@ -23,6 +23,8 @@ test('buildResumePreview appends draft project and unique skills without mutatin
   assert.equal(baseResume.projects.length, 1)
   assert.equal(preview.resume.projects.length, 2)
   assert.equal(preview.resume.projects[1].title, 'Radiology RAG Enablement')
+  preview.resume.projects[1].title = 'Mutated project title'
+  assert.equal(draft.webProject.title, 'Radiology RAG Enablement')
   assert.ok(preview.resume.skills.length > baseResume.skills.length)
   assert.deepEqual(preview.metadata.resumeBullets, [draft.resumeBullet])
   assert.equal(preview.metadata.reviewOnly, true)
@@ -42,4 +44,8 @@ test('appendUniqueSkills keeps order and removes duplicates', () => {
     appendUniqueSkills(['A', 'B'], ['B', 'C', '', 'A']),
     ['A', 'B', 'C'],
   )
+})
+
+test('appendUniqueSkills treats non-array inputs as empty arrays', () => {
+  assert.deepEqual(appendUniqueSkills(null, ['A']), ['A'])
 })
