@@ -10,15 +10,14 @@ test('recognizes the local career route exactly', () => {
   assert.equal(isCareerPath('/career-public'), false);
 });
 
-test('requires an explicit Vite enable flag', () => {
-  assert.equal(isCareerConsoleEnabled({ env: { DEV: true, VITE_ENABLE_CAREER_CONSOLE: 'true' }, pathname: '/career' }), true);
-  assert.equal(isCareerConsoleEnabled({ env: { DEV: true, VITE_ENABLE_CAREER_CONSOLE: '1' }, pathname: '/career' }), true);
-  assert.equal(isCareerConsoleEnabled({ env: { DEV: true, VITE_ENABLE_CAREER_CONSOLE: 'false' }, pathname: '/career' }), false);
-  assert.equal(isCareerConsoleEnabled({ env: { DEV: true }, pathname: '/career' }), false);
-  assert.equal(isCareerConsoleEnabled({ env: { DEV: true, VITE_ENABLE_CAREER_CONSOLE: 'true' }, pathname: '/' }), false);
+test('opens the local Career Console for the exact route in Vite dev mode', () => {
+  assert.equal(isCareerConsoleEnabled({ env: { DEV: true }, pathname: '/career' }), true);
+  assert.equal(isCareerConsoleEnabled({ env: { DEV: true }, pathname: '/career/' }), true);
+  assert.equal(isCareerConsoleEnabled({ env: { DEV: true }, pathname: '/' }), false);
+  assert.equal(isCareerConsoleEnabled({ env: { DEV: true }, pathname: '/career-public' }), false);
 });
 
-test('requires Vite dev mode even when the flag is set', () => {
-  assert.equal(isCareerConsoleEnabled({ env: { DEV: false, VITE_ENABLE_CAREER_CONSOLE: 'true' }, pathname: '/career' }), false);
-  assert.equal(isCareerConsoleEnabled({ env: { VITE_ENABLE_CAREER_CONSOLE: 'true' }, pathname: '/career' }), false);
+test('requires Vite dev mode', () => {
+  assert.equal(isCareerConsoleEnabled({ env: { DEV: false }, pathname: '/career' }), false);
+  assert.equal(isCareerConsoleEnabled({ env: {}, pathname: '/career' }), false);
 });

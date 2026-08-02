@@ -8,3 +8,10 @@ dist/
 .tmp-career-tests/
 .superpowers/sdd/
 src/data/career-versions.local.json
+career/career-ops.db*
+career/jobs/
+career/jds/*
+career/output/*
+career/versions/*
+public/generated-resumes/*
+public/images/projects/fallback.jpg

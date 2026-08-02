@@ -1,13 +1,24 @@
 import { Sun, Moon, Download, Globe } from 'lucide-react'
 
-export default function Header({ lang, setLang, dark, setDark, onDownload, versions = [], selectedVersion, setSelectedVersion, languageDisabled = false }) {
+export default function Header({
+  lang,
+  setLang,
+  dark,
+  setDark,
+  onDownload,
+  versions = [],
+  selectedVersion,
+  setSelectedVersion,
+  languageDisabled = false,
+  showDownload = true,
+}) {
   return (
-    <div className="flex justify-between items-center mb-8">
+    <div className="no-print flex justify-between items-center mb-8">
       <div className="flex items-center space-x-2">
-        <button 
+        <button
           className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
-            lang === 'en' 
-              ? 'bg-blue-500 text-white shadow-lg' 
+            lang === 'en'
+              ? 'bg-blue-500 text-white shadow-lg'
               : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600'
           } ${languageDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
           onClick={() => setLang('en')}
@@ -16,10 +27,10 @@ export default function Header({ lang, setLang, dark, setDark, onDownload, versi
           <Globe className="w-4 h-4 inline mr-1" />
           EN
         </button>
-        <button 
+        <button
           className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
-            lang === 'zh' 
-              ? 'bg-blue-500 text-white shadow-lg' 
+            lang === 'zh'
+              ? 'bg-blue-500 text-white shadow-lg'
               : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600'
           } ${languageDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
           onClick={() => setLang('zh')}
@@ -29,7 +40,7 @@ export default function Header({ lang, setLang, dark, setDark, onDownload, versi
           中文
         </button>
       </div>
-      
+
       <div className="flex items-center space-x-2">
         {versions.length > 0 && (
           <select
@@ -46,15 +57,17 @@ export default function Header({ lang, setLang, dark, setDark, onDownload, versi
             ))}
           </select>
         )}
-        <button 
-          className="btn-secondary"
-          onClick={onDownload}
-          title={lang === 'en' ? 'Download PDF' : '下载PDF'}
-        >
-          <Download className="w-4 h-4 inline mr-1" />
-          {lang === 'en' ? 'PDF' : 'PDF'}
-        </button>
-        <button 
+        {showDownload && (
+          <button
+            className="btn-secondary"
+            onClick={onDownload}
+            title={lang === 'en' ? 'Download PDF' : '下载PDF'}
+          >
+            <Download className="w-4 h-4 inline mr-1" />
+            {lang === 'en' ? 'PDF' : 'PDF'}
+          </button>
+        )}
+        <button
           className="btn-secondary"
           onClick={() => setDark(!dark)}
           title={dark ? 'Switch to light mode' : 'Switch to dark mode'}
@@ -64,4 +77,4 @@ export default function Header({ lang, setLang, dark, setDark, onDownload, versi
       </div>
     </div>
   )
-} 
+}

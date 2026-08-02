@@ -181,13 +181,118 @@ test('loadCareerConsoleState clears loading and surfaces a compact error on load
   assert.match(result.loadError, /unable to load/i)
 })
 
-test('CareerConsole renders the local Portfolio Studio entry point', async () => {
+test('loadCareerConsoleState preserves Jobs when Agent Runs are temporarily unavailable', async () => {
+  const module = await importJsxModule('src/career/CareerConsole.jsx')
+  const versions = [{ slug: 'sample-role' }]
+  const jobs = [{ id: 'job-1', slug: 'sample-role' }]
+  const result = await module.loadCareerConsoleState(
+    async () => versions,
+    async () => jobs,
+    async () => { throw new Error('runtime offline') },
+  )
+
+  assert.deepEqual(result.careerVersions, versions)
+  assert.deepEqual(result.careerJobs, jobs)
+  assert.deepEqual(result.careerRuns, [])
+  assert.equal(result.loadError, '')
+})
+
+test('CareerConsole renders the approved five-area navigation', async () => {
   const { default: CareerConsole } = await importJsxModule('src/career/CareerConsole.jsx')
   const html = renderToStaticMarkup(React.createElement(CareerConsole))
 
-  assert.match(html, /Portfolio Studio/)
-  assert.match(html, /review payload/i)
-  assert.match(html, /No files are changed/i)
+  assert.match(html, /New Job/)
+  assert.match(html, /Opportunities/)
+  assert.match(html, /Jobs/)
+  assert.match(html, /Agent Runs/)
+  assert.match(html, /Interview/)
+  assert.doesNotMatch(html, />Score</)
+  assert.doesNotMatch(html, />Prompts</)
+})
+
+test('CareerConsole starts a new Job with intake before review and optional Portfolio Studio', async () => {
+  const { default: CareerConsole } = await importJsxModule('src/career/CareerConsole.jsx')
+  const html = renderToStaticMarkup(React.createElement(CareerConsole))
+
+  const intakeIndex = html.indexOf('JD Workflow')
+  const evidenceIndex = html.indexOf('Evidence Review')
+  const applyPackIndex = html.indexOf('Manual Apply Pack')
+  const portfolioIndex = html.indexOf('Portfolio Studio')
+
+  assert.ok(intakeIndex >= 0)
+  assert.ok(intakeIndex < evidenceIndex)
+  assert.ok(evidenceIndex < applyPackIndex)
+  assert.ok(applyPackIndex < portfolioIndex)
+  assert.match(html, /Optional resume evidence workspace/)
+  assert.doesNotMatch(html, /JD\/CV Match Score/)
+  assert.doesNotMatch(html, /Application Agent/)
+  assert.doesNotMatch(html, /Generated versions/)
+})
+
+test('JobsPanel manages existing jobs without duplicating JD Workflow', async () => {
+  const { JobsPanel } = await importJsxModule('src/career/CareerConsole.jsx')
+  const html = renderToStaticMarkup(React.createElement(JobsPanel, {
+    rows: [],
+    loading: false,
+    loadError: '',
+    selected: null,
+    selectedSlug: '',
+    onSelect: () => {},
+    onUpdate: () => {},
+  }))
+
+  assert.match(html, /Job portfolio/)
+  assert.doesNotMatch(html, /JD Workflow/)
+  assert.doesNotMatch(html, /Run local workflow/)
+})
+
+test('AgentRunsPanel renders persisted workflow events beside optional agent tools', async () => {
+  const { AgentRunsPanel } = await importJsxModule('src/career/CareerConsole.jsx')
+  const html = renderToStaticMarkup(React.createElement(AgentRunsPanel, {
+    runs: [{
+      id: 'run-001',
+      company: 'Varian',
+      roleTitle: 'Product Lead',
+      status: 'complete',
+      stage: 'apply_pack',
+      events: [{ id: 'event-001', label: 'Resume adapt', detail: 'Generated resume', type: 'workflow.step' }],
+    }],
+    selected: null,
+  }))
+
+  assert.match(html, /Local workflow history/)
+  assert.match(html, /Varian - Product Lead/)
+  assert.match(html, /Resume adapt/)
+  assert.match(html, /Generated resume/)
+  assert.match(html, /Career agent skills/)
+})
+
+test('AgentSkillsPanel lists local career skills and LinkedIn MCP capabilities', async () => {
+  const { AgentSkillsPanel } = await importJsxModule('src/career/CareerConsole.jsx')
+  const html = renderToStaticMarkup(React.createElement(AgentSkillsPanel, { initiallyOpen: true }))
+
+  assert.match(html, /Career agent skills/)
+  assert.match(html, /Skills enabled/)
+  assert.match(html, /agent-browser/)
+  assert.match(html, /resume-polish-enhanced/)
+  assert.match(html, /stickerdaniel\/linkedin-mcp-server/)
+  assert.match(html, /get_company_profile/)
+  assert.match(html, /get_company_posts/)
+  assert.match(html, /search_jobs/)
+  assert.match(html, /search_people/)
+  assert.match(html, /get_job_details/)
+})
+
+test('AgentSkillsPanel keeps skills collapsed until enabled', async () => {
+  const { AgentSkillsPanel } = await importJsxModule('src/career/CareerConsole.jsx')
+  const html = renderToStaticMarkup(React.createElement(AgentSkillsPanel))
+
+  assert.match(html, /Career agent skills/)
+  assert.match(html, /Optional boosters/)
+  assert.match(html, /Skills disabled/)
+  assert.match(html, /Enable/)
+  assert.doesNotMatch(html, /agent-browser/)
+  assert.doesNotMatch(html, /stickerdaniel\/linkedin-mcp-server/)
 })
 
 test('ResumePreview renders draft bullets and resume layout sections', async () => {
@@ -216,23 +321,226 @@ test('ResumePreview renders draft bullets and resume layout sections', async () 
   assert.match(html, /Draft bullets/)
 })
 
-test('CareerConsole renders the resume preview workspace', async () => {
+test('ResumeWorkbench renders editable resume modules and export controls', async () => {
+  const { default: ResumeWorkbench } = await importJsxModule('src/career/ResumeWorkbench.jsx')
+  const html = renderToStaticMarkup(
+    React.createElement(ResumeWorkbench, {
+      baseResume: {
+        education: [{ degree: 'PhD', institution: 'CAS' }],
+        work: [{ title: 'Senior Application Manager', company: 'Bayer', details: ['Built clinical AI tools.'] }],
+        skills: ['Medical AI'],
+        certificates: [],
+        projects: [{ title: 'Existing Project', description: 'Existing.' }],
+        publications: [],
+        posters: [],
+        patents: [],
+      },
+    }),
+  )
+
+  assert.match(html, /Resume WYSIWYG Workbench/)
+  assert.match(html, /Education/)
+  assert.match(html, /Work Experience/)
+  assert.match(html, /Save local draft/)
+  assert.match(html, /Download PDF/)
+})
+
+test('ResumeWorkbench applies a Portfolio Studio draft into the editable resume canvas', async () => {
+  const { default: ResumeWorkbench } = await importJsxModule('src/career/ResumeWorkbench.jsx')
+  const { buildPortfolioDraft } = await importJsxModule('src/career/portfolioDrafts.js')
+  const draft = buildPortfolioDraft({
+    title: 'Radiology RAG Enablement',
+    projectType: 'llm-rag',
+    imagePath: '/images/projects/project-24.jpg',
+    rawText: 'Built a RAG workflow for radiology product education.',
+  })
+  const { render } = renderWithHookDispatcher(ResumeWorkbench, {
+    baseResume: {
+      education: [],
+      work: [],
+      skills: ['Medical AI'],
+      certificates: [],
+      projects: [],
+      publications: [],
+      posters: [],
+      patents: [],
+    },
+    portfolioDraft: draft,
+  })
+
+  let tree = render()
+  const applyProjectButton = findElements(tree, (node) => node.type === 'button' && textContent(node.props.children).includes('Apply generated project'))[0]
+  const applySkillsButton = findElements(tree, (node) => node.type === 'button' && textContent(node.props.children).includes('Apply suggested skills'))[0]
+
+  assert.ok(applyProjectButton)
+  assert.equal(applyProjectButton.props.draggable, true)
+  applyProjectButton.props.onClick()
+  applySkillsButton.props.onClick()
+
+  tree = render()
+  const renderedText = textContent(tree)
+  assert.match(renderedText, /Radiology RAG Enablement/)
+  assert.match(renderedText, /RAG/)
+})
+
+test('CareerConsole renders a career-ops center without embedding the resume workbench', async () => {
   const { default: CareerConsole } = await importJsxModule('src/career/CareerConsole.jsx')
   const html = renderToStaticMarkup(React.createElement(CareerConsole))
 
-  assert.match(html, /Resume Preview/)
-  assert.match(html, /Generate a portfolio draft to preview it in the live resume layout/)
-  assert.match(html, /No tailored resume versions loaded yet/i)
+  assert.doesNotMatch(html, /Resume WYSIWYG Workbench/)
+  assert.doesNotMatch(html, /Download PDF/)
+  assert.match(html, /Career-Ops Center/)
+  assert.match(html, /Portfolio Studio/)
+  assert.match(html, /Evidence Review/)
+  assert.match(html, /Manual Apply Pack/)
+  assert.match(html, /JD Workflow/)
+  assert.match(html, /Resume home/)
+  assert.doesNotMatch(html, /JD\/CV Match Score/)
+  assert.doesNotMatch(html, /Application Agent/)
+  assert.match(
+    html,
+    /Evidence Review will populate after this JD-specific version exists/i,
+  )
 })
 
-test('JdIntakeHelper renders a visual JD workflow with generated commands', async () => {
+test('CareerConsole score tab renders six rubric dimensions and a 4.0 apply gate', async () => {
+  const { ScoreRubricPanel } = await importJsxModule('src/career/CareerConsole.jsx')
+  const html = renderToStaticMarkup(React.createElement(ScoreRubricPanel))
+
+  assert.match(html, /JD\/CV Match Score/)
+  assert.match(html, /4\.0 apply gate/)
+  assert.match(html, /医疗行业匹配度/)
+  assert.match(html, /岗位类型匹配度/)
+  assert.match(html, /证据强度/)
+  assert.match(html, /量化影响/)
+  assert.match(html, /关键词\/ATS 对齐/)
+  assert.match(html, /风险与缺口/)
+})
+
+test('ApplicationAgentPanel toggles Agent Active state and exposes a local task log', async () => {
+  const { default: ApplicationAgentPanel } = await importJsxModule('src/career/ApplicationAgentPanel.jsx')
+  const { render } = renderWithHookDispatcher(ApplicationAgentPanel, { selectedSlug: 'medical-ai-lead' })
+
+  let tree = render()
+  const toggle = findElements(tree, (node) => node.type === 'button' && textContent(node.props.children).includes('Agent Active'))[0]
+
+  assert.ok(toggle)
+  assert.match(textContent(tree), /Manual mode/)
+  toggle.props.onClick()
+
+  tree = render()
+  const renderedText = textContent(tree)
+  assert.match(renderedText, /Agent Active/)
+  assert.match(renderedText, /Live local log/)
+  assert.match(renderedText, /Scan job page/)
+  assert.match(renderedText, /Pause before final submit/)
+})
+
+test('ApplicationAgentPanel models browser automation as a human-confirmed local workflow', async () => {
+  const { default: ApplicationAgentPanel } = await importJsxModule('src/career/ApplicationAgentPanel.jsx')
+  const html = renderToStaticMarkup(React.createElement(ApplicationAgentPanel, { selectedSlug: 'medical-ai-lead' }))
+
+  assert.match(html, /Application Agent/)
+  assert.match(html, /Job link/)
+  assert.match(html, /Scan job page/)
+  assert.match(html, /Map application fields/)
+  assert.match(html, /Attach resume PDF/)
+  assert.match(html, /Human confirmation/)
+  assert.match(html, /No final submission without confirmation/)
+})
+
+test('Interview role-play derives a medical interview plan from JD and LinkedIn context', async () => {
+  const { buildInterviewBrief, buildRolePlayReply } = await importJsxModule('src/career/interviewRolePlayState.js')
+  const brief = buildInterviewBrief({
+    jdText: 'Medical AI Product Lead. Own hospital adoption, clinical evidence, and digital platform scale-up.',
+    interviewerLinkedIn: 'Name: Dr. Mei Lin\nVP Clinical Innovation | Digital Health | Hospital partnerships',
+  })
+  const reply = buildRolePlayReply({
+    brief,
+    answer: 'I aligned clinical, commercial, and engineering teams to improve hospital workflow adoption by 25%.',
+  })
+
+  assert.equal(brief.interviewer.name, 'Dr. Mei Lin')
+  assert.match(brief.interviewer.focus.join(' '), /clinical adoption/i)
+  assert.match(brief.interviewer.focus.join(' '), /digital product/i)
+  assert.ok(brief.likelyQuestions.length >= 3)
+  assert.match(brief.prompt, /one question at a time/i)
+  assert.match(reply.coaching, /measurable outcome/i)
+  assert.match(reply.followUp, /trade-off/i)
+})
+
+test('Interview role-play respects session settings and produces a transcript-grounded debrief', async () => {
+  const { buildInterviewBrief, buildInterviewDebrief, buildRolePlayReply } = await importJsxModule('src/career/interviewRolePlayState.js')
+  const brief = buildInterviewBrief({
+    jdText: 'Medical Digital Product Lead. Improve clinical workflow adoption.',
+    interviewerLinkedIn: 'Name: Dr. Mei Lin\nClinical Innovation Director',
+    interviewType: 'stakeholder',
+    pressure: 'challenging',
+    questionCount: '3',
+    includeCurveballs: false,
+  })
+  const firstReply = buildRolePlayReply({
+    brief,
+    answer: 'I aligned hospital, commercial, and engineering partners around a 25% workflow adoption increase.',
+    turn: 0,
+  })
+  const finalReply = buildRolePlayReply({
+    brief,
+    answer: 'I used clinical evidence, a risk review, and customer feedback to decide the next release.',
+    turn: 2,
+  })
+  const challengingReply = buildRolePlayReply({
+    brief,
+    answer: 'I would make the decision transparent and align all partners on the evidence.',
+    turn: 1,
+  })
+  const debrief = buildInterviewDebrief({
+    brief,
+    messages: [
+      { role: 'candidate', assessment: firstReply.assessment },
+      { role: 'candidate', assessment: finalReply.assessment },
+    ],
+  })
+
+  assert.equal(brief.settings.interviewType, 'stakeholder')
+  assert.equal(brief.settings.pressure, 'challenging')
+  assert.equal(brief.settings.questionCount, 3)
+  assert.equal(brief.likelyQuestions.length, 3)
+  assert.match(brief.likelyQuestions[0], /clinical leader/i)
+  assert.match(challengingReply.followUp, /be specific/i)
+  assert.equal(finalReply.complete, true)
+  assert.equal(debrief.answered, 2)
+  assert.ok(debrief.overall > 0)
+  assert.match(debrief.priority, /Add a specific|Use a tighter|Reconnect/i)
+})
+
+test('InterviewRolePlay renders the local-first preparation flow and role-play controls', async () => {
+  const { default: InterviewRolePlay } = await importJsxModule('src/career/InterviewRolePlay.jsx')
+  const html = renderToStaticMarkup(React.createElement(InterviewRolePlay))
+
+  assert.match(html, /Interview role-play/)
+  assert.match(html, /Job description/)
+  assert.match(html, /Interviewer LinkedIn notes/)
+  assert.match(html, /Build interview plan/)
+  assert.match(html, /Local-first/)
+})
+
+test('JdIntakeHelper starts a new job cleanly and keeps recovery commands unavailable before JD intake', async () => {
   const { default: JdIntakeHelper } = await importJsxModule('src/career/JdIntakeHelper.jsx')
   const html = renderToStaticMarkup(React.createElement(JdIntakeHelper, { selectedSlug: 'medical-ai-lead' }))
 
   assert.match(html, /JD Workflow/)
-  assert.match(html, /career\/jds\/medical-ai-lead.md/)
-  assert.match(html, /npm run resume:adapt -- --jd career\/jds\/medical-ai-lead.md --slug medical-ai-lead/)
-  assert.match(html, /Manual command step/)
+  assert.match(html, /Visual workflow/)
+  assert.match(html, /Run local workflow/)
+  assert.match(html, /Resume adapt/)
+  assert.match(html, /PDF render/)
+  assert.match(html, /Manifest refresh/)
+  assert.match(html, /Start new job/)
+  assert.match(html, /Job source link/)
+  assert.match(html, /career\/jds\/new-role-slug.md/)
+  assert.match(html, /Run the workflow once first/)
+  assert.match(html, /cannot fail with ENOENT/i)
+  assert.doesNotMatch(html, /Manual command step/)
 })
 
 test('PortfolioStudio calls onDraftChange when generating and clearing a draft', async () => {
@@ -265,6 +573,38 @@ test('PortfolioStudio calls onDraftChange when generating and clearing a draft',
   clearButton.props.onClick()
   assert.equal(changes.length, 2)
   assert.equal(changes[1], null)
+})
+
+test('PortfolioStudio exposes generated draft actions for applying project and skills to the editor', async () => {
+  const { default: PortfolioStudio } = await importJsxModule('src/career/PortfolioStudio.jsx')
+  const applied = []
+  const { render } = renderWithHookDispatcher(PortfolioStudio, {
+    onDraftChange: () => {},
+    onApplyProject: (draft) => applied.push(['project', draft.webProject.title]),
+    onApplySkills: (draft) => applied.push(['skills', draft.skillSuggestions.length]),
+  })
+
+  let tree = render()
+  findElements(tree, (node) => node.type === 'input' && node.props?.placeholder === 'Radiology RAG Enablement')[0].props.onChange({
+    target: { value: 'Radiology RAG Enablement' },
+  })
+  findElements(
+    tree,
+    (node) => node.type === 'textarea' && node.props?.placeholder === 'What you built, medical context, users, workflow, tools, outcomes, and proof.',
+  )[0].props.onChange({ target: { value: 'Built a RAG workflow for imaging notes.' } })
+
+  tree = render()
+  findElements(tree, (node) => node.type === 'button' && textContent(node.props.children).includes('Generate draft'))[0].props.onClick()
+
+  tree = render()
+  findElements(tree, (node) => node.type === 'button' && textContent(node.props.children).includes('Apply project to resume'))[0].props.onClick()
+  findElements(tree, (node) => node.type === 'button' && textContent(node.props.children).includes('Apply skills to resume'))[0].props.onClick()
+
+  assert.equal(applied[0][0], 'project')
+  assert.equal(applied[0][1], 'Radiology RAG Enablement')
+  assert.equal(applied[1][0], 'skills')
+  assert.ok(applied[1][1] > 0)
+  assert.ok(findElements(tree, (node) => node.type === 'details' && textContent(node.props.children).includes('Review payload')).length)
 })
 
 test('PortfolioStudio keeps the default onDraftChange dependency stable across renders', async () => {

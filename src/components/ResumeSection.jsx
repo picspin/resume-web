@@ -1,6 +1,7 @@
 import { GraduationCap, Briefcase, Code, Trophy, FileText, Award, BadgeCheck, Image as ImageIcon } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { FALLBACK_PROJECT_IMAGE, buildProjectImageCandidates } from './projectImages.js'
 
 const sectionIcons = {
   education: GraduationCap,
@@ -13,35 +14,32 @@ const sectionIcons = {
   posters: ImageIcon
 }
 
-// Helper to find the first available image for a project
-function getProjectImage(p, i) {
-  // Use projectNumber if present, else fallback to index
-  const num = p.projectNumber || (i + 1);
-  if (p.image && p.image.trim() !== '') return p.image;
-  const exts = ['jpg', 'png', 'gif', 'jpeg', 'webp'];
-  for (const ext of exts) {
-    const path = `/images/projects/project-${num}.${ext}`;
-    if (window.__projectImages && window.__projectImages[path]) return path;
+function ProjectImage({ project, index, alt, className, style }) {
+  const candidates = buildProjectImageCandidates(project, index)
+  const candidateKey = candidates.join('|')
+  const [candidateIndex, setCandidateIndex] = useState(0)
+  const src = candidates[Math.min(candidateIndex, candidates.length - 1)] || FALLBACK_PROJECT_IMAGE
+
+  useEffect(() => {
+    setCandidateIndex(0)
+  }, [candidateKey])
+
+  const handleImageError = () => {
+    setCandidateIndex((current) => Math.min(current + 1, candidates.length - 1))
   }
-  return '/images/projects/fallback.jpg';
+
+  return (
+    <img
+      src={src}
+      alt={alt}
+      className={className}
+      style={style}
+      onError={handleImageError}
+    />
+  )
 }
 
-// Preload all possible images on first render
-if (typeof window !== 'undefined' && !window.__projectImages) {
-  window.__projectImages = {};
-  const exts = ['jpg', 'png', 'gif', 'jpeg', 'webp'];
-  for (let i = 1; i <= 30; i++) {
-    for (const ext of exts) {
-      const path = `/images/projects/project-${i}.${ext}`;
-      const img = new window.Image();
-      img.onload = () => { window.__projectImages[path] = true; };
-      img.onerror = () => { window.__projectImages[path] = false; };
-      img.src = path;
-    }
-  }
-}
-
-export default function ResumeSection({ data }) {
+export default function ResumeSection({ data, renderSectionChrome, sectionOrder }) {
   const [hoveredProject, setHoveredProject] = useState(null);
   const [openedProject, setOpenedProject] = useState(null);
 
@@ -147,9 +145,7 @@ export default function ResumeSection({ data }) {
       icon: sectionIcons.projects,
       content: (
         <div className="max-h-96 overflow-y-auto scrollbar-thin pr-2 grid gap-4">
-          {Array.isArray(data.projects) && data.projects.map((p, i) => {
-            const imgSrc = getProjectImage(p, i);
-            return (
+          {Array.isArray(data.projects) && data.projects.map((p, i) => (
               <motion.div
                 key={i}
                 className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 flex flex-col md:flex-row items-start gap-4 border border-gray-100 dark:border-gray-700 cursor-pointer"
@@ -160,19 +156,18 @@ export default function ResumeSection({ data }) {
                 onClick={() => handleProjectClick(i)}
                 style={{ zIndex: hoveredProject === i ? 2 : 1 }}
               >
-                <img
-                  src={imgSrc}
+                <ProjectImage
+                  project={p}
+                  index={i}
                   alt={p.title || 'project'}
                   className="w-[120px] h-[90px] object-cover rounded mb-2 md:mb-0 md:mr-4 border border-gray-200 dark:border-gray-700"
-                  onError={e => { e.target.onerror = null; e.target.src = '/images/projects/fallback.jpg'; }}
                 />
                 <div className="flex-1">
                   <div className="font-semibold text-lg mb-1">{p.title || ''}</div>
                   <div className="text-gray-700 dark:text-gray-200 text-sm" dangerouslySetInnerHTML={{ __html: p.description || '' }} />
                 </div>
               </motion.div>
-            );
-          })}
+          ))}
           <AnimatePresence>
             {openedProject !== null && data.projects && data.projects[openedProject] && (
               <motion.div
@@ -191,12 +186,12 @@ export default function ResumeSection({ data }) {
                   style={{ minWidth: 480, minHeight: 360, maxWidth: '90vw', maxHeight: '90vh' }}
                   onClick={e => e.stopPropagation()}
                 >
-                  <img
-                    src={getProjectImage(data.projects[openedProject], openedProject)}
+                  <ProjectImage
+                    project={data.projects[openedProject]}
+                    index={openedProject}
                     alt={data.projects[openedProject].title || 'project'}
                     className="w-full max-w-[600px] max-h-[400px] object-contain rounded mb-4 border border-gray-200 dark:border-gray-700"
                     style={{ minWidth: 480, minHeight: 360 }}
-                    onError={e => { e.target.onerror = null; e.target.src = '/images/projects/fallback.jpg'; }}
                   />
                   <div className="font-semibold text-xl mb-2 text-center">{data.projects[openedProject].title || ''}</div>
                   <div className="text-gray-700 dark:text-gray-200 text-base mb-4 text-center" dangerouslySetInnerHTML={{ __html: data.projects[openedProject].description || '' }} />
@@ -227,10 +222,10 @@ export default function ResumeSection({ data }) {
                 <div className="text-sm text-gray-600 dark:text-gray-300">
                   {pub.journal}
                   {pub.link && (
-                    <a 
-                      href={pub.link} 
-                      className="ml-2 text-blue-500 hover:text-blue-600 underline" 
-                      target="_blank" 
+                    <a
+                      href={pub.link}
+                      className="ml-2 text-blue-500 hover:text-blue-600 underline"
+                      target="_blank"
                       rel="noopener noreferrer"
                     >
                       [Link]
@@ -272,10 +267,10 @@ export default function ResumeSection({ data }) {
                 {patent.authors}
               </div>
               {patent.link && (
-                <a 
-                  href={patent.link} 
-                  className="text-blue-500 hover:text-blue-600 underline text-sm" 
-                  target="_blank" 
+                <a
+                  href={patent.link}
+                  className="text-blue-500 hover:text-blue-600 underline text-sm"
+                  target="_blank"
                   rel="noopener noreferrer"
                 >
                   View Patent
@@ -288,11 +283,18 @@ export default function ResumeSection({ data }) {
     }
   ]
 
+  const orderedSections = Array.isArray(sectionOrder)
+    ? [
+        ...sectionOrder.map((sectionKey) => sections.find((section) => section.key === sectionKey)).filter(Boolean),
+        ...sections.filter((section) => !sectionOrder.includes(section.key)),
+      ]
+    : sections
+
   return (
     <div className="space-y-8">
-      {sections.map((section) => {
+      {orderedSections.map((section) => {
         const Icon = section.icon
-        return (
+        const renderedSection = (
           <div key={section.key} className="card p-6 relative">
             <div className="absolute -top-6 left-6 bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-200 px-5 py-2 rounded-full shadow-lg text-lg font-semibold flex items-center space-x-2">
               <Icon className="w-5 h-5" />
@@ -303,6 +305,7 @@ export default function ResumeSection({ data }) {
             </div>
           </div>
         )
+        return renderSectionChrome ? renderSectionChrome(section, renderedSection) : renderedSection
       })}
     </div>
   )

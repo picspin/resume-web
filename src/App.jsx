@@ -2,17 +2,15 @@ import { lazy, Suspense, useState, useEffect } from 'react'
 import resumeEn from './data/resume-en.json'
 import resumeZh from './data/resume-zh.json'
 import resumeVersions from './data/resume-versions.json'
-import ResumeSection from './components/ResumeSection'
+import EditableResumeShell from './components/EditableResumeShell'
 import Header from './components/Header'
 import ContactInfo from './components/ContactInfo'
+import { exportWebResumePdf } from './components/webResumePdfExport'
 import { isCareerConsoleEnabled, isCareerPath } from './career/careerConsoleEnabled'
 import './App.css'
 
 const CareerConsole = import.meta.env.DEV
   ? lazy(() => import('./career/CareerConsole'))
-  : null
-const CareerEntry = import.meta.env.DEV
-  ? lazy(() => import('./career/CareerEntry'))
   : null
 
 function App() {
@@ -69,18 +67,11 @@ function App() {
   const displayLang = version?.resume?.language || lang
 
   const handleDownload = () => {
-    if (version?.pdfPath) {
-      const link = document.createElement('a')
-      link.href = version.pdfPath
-      link.download = `${version.slug}.pdf`
-      link.click()
-      return
-    }
-
-    const link = document.createElement('a')
-    link.href = '/resume-xiaolei-zhu.pdf'
-    link.download = `Xiaolei_Zhu_Resume_${lang.toUpperCase()}.pdf`
-    link.click()
+    exportWebResumePdf({
+      title: version?.slug
+        ? `Xiaolei Zhu - ${version.slug} - Web Resume`
+        : `Xiaolei Zhu - ${displayLang.toUpperCase()} - Web Resume`,
+    })
   }
 
   return (
@@ -89,43 +80,36 @@ function App() {
     }`}>
       {/* Background Banner */}
       <div className="fixed top-0 left-0 w-full h-80 z-0">
-        <img 
-          src="/images/banner.jpeg" 
-          className="w-full h-full object-cover" 
-          alt="Professional background" 
+        <img
+          src="/images/banner.jpeg"
+          className="w-full h-full object-cover"
+          alt="Professional background"
         />
         <div className="absolute inset-0 bg-gradient-to-b from-white/80 to-white/40 dark:from-gray-900/80 dark:to-gray-900/40" />
       </div>
 
-      <div className="relative z-10 max-w-4xl mx-auto pt-32 pb-8 px-4">
+      <div className="resume-print-page relative z-10 max-w-4xl mx-auto pt-32 pb-8 px-4">
         {/* Header with Controls */}
-        <Header 
-          lang={lang} 
-          setLang={setLang} 
-          dark={dark} 
+        <Header
+          lang={lang}
+          setLang={setLang}
+          dark={dark}
           setDark={setDark}
           onDownload={handleDownload}
           versions={resumeVersions}
           selectedVersion={selectedVersion}
           setSelectedVersion={setSelectedVersion}
           languageDisabled={Boolean(version)}
+          showDownload={false}
         />
-
-        {careerConsoleAvailable && CareerEntry && !isCareerPath(pathname) && (
-          <div className="mb-6 flex justify-end">
-            <Suspense fallback={null}>
-              <CareerEntry />
-            </Suspense>
-          </div>
-        )}
 
         {/* Profile Section */}
         <div className="flex flex-col items-center mb-8">
           <div className="relative">
-            <img 
-              src="/images/Avatar.jpg" 
-              className="w-48 h-48 rounded-full border-4 border-white shadow-2xl -mt-24 mb-6 bg-white object-cover" 
-              alt="Xiaolei Zhu" 
+            <img
+              src="/images/Avatar.jpg"
+              className="w-48 h-48 rounded-full border-4 border-white shadow-2xl -mt-24 mb-6 bg-white object-cover"
+              alt="Xiaolei Zhu"
             />
             <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-green-500 rounded-full border-4 border-white"></div>
           </div>
@@ -135,13 +119,17 @@ function App() {
           <p className="text-xl text-gray-600 dark:text-gray-300 text-center mb-4">
             {displayLang === 'en' ? 'Application Manager' : '应用经理'} | Guangzhou, China
           </p>
-          
+
           {/* Contact Info Cards */}
           <ContactInfo data={data.general} />
         </div>
 
         {/* Resume Content */}
-        <ResumeSection data={data} />
+        <EditableResumeShell
+          data={data}
+          careerConsoleAvailable={careerConsoleAvailable && !isCareerPath(pathname)}
+          onExportPdf={handleDownload}
+        />
       </div>
     </div>
   )

@@ -12,7 +12,8 @@ This repository contains two connected tools:
 - Responsive public resume layout.
 - Structured skills, projects, publications, patents, and PDF download support.
 - JD-specific medical/pharma resume adaptation workflow.
-- Local-only `/career` review console for generated resume versions, evidence, truth warnings, PDFs, application URLs, notes, and manual apply drafts.
+- Main resume page edit mode for module-level WYSIWYG review while preserving the public layout.
+- Local-only `/career` Career-Ops center organized around New Job, Opportunities, Jobs, Agent Runs, and Interview workflows.
 
 ## Tech Stack
 
@@ -23,6 +24,8 @@ This repository contains two connected tools:
 - **Resume ops:** Node ESM scripts, `node:test`, Playwright PDF rendering
 
 ## Quick Start
+
+Use Node.js 22.13 or newer. CI and deployment use Node.js 24.
 
 1. Install dependencies:
    ```bash
@@ -36,7 +39,7 @@ This repository contains two connected tools:
 
 3. Open the local Vite URL, usually:
    ```text
-   http://127.0.0.1:5173/
+   http://127.0.0.1:3000/
    ```
 
 4. Build for production:
@@ -59,7 +62,10 @@ This repository contains two connected tools:
 | `npm run dev` | Start the public resume development server. |
 | `npm run build` | Build the public resume site into `dist/`. |
 | `npm run preview` | Preview the built site locally. |
+| `npm run format` | Format staged text files with the local no-dependency formatter. |
+| `npm run format:check` | Check staged text files for formatting changes. |
 | `npm run lint` | Run ESLint. |
+| `npm run hooks:install` | Enable the tracked `.githooks/pre-commit` hook for this repository. |
 | `npm run resume:test` | Run resume-ops unit tests. |
 | `npm run career:test` | Run local career console tests. |
 | `npm run resume:sync` | Sync current web resume data into `career/data/master-resume.json`. |
@@ -109,35 +115,60 @@ Outputs are written to:
 
 ### Use the Local Career Console
 
-The `/career` console is a local review workspace. It is disabled in production builds and only opens when Vite is running in dev mode with an explicit flag.
+The `/career` console is a local Career-Ops workspace. It is disabled in production builds and opens automatically while Vite is running in dev mode.
 
 Start it with:
 
 ```bash
-VITE_ENABLE_CAREER_CONSOLE=true npm run dev -- --host 127.0.0.1
+npm run dev -- --host 127.0.0.1
 ```
 
 Then open:
 
 ```text
-http://127.0.0.1:5173/career
+http://127.0.0.1:3000/career
 ```
 
 Use the console to:
 
-- Review generated resume versions and PDF readiness.
+- Start a Job with JD intake, resume adaptation, PDF rendering, Evidence Review, and Manual Apply Pack in one visual workflow.
+- Open the optional Portfolio Studio only when a Job needs additional project or skill evidence.
+- Review generated Job projects, six-dimension scores, artifacts, and application state in the dedicated Jobs area.
+- Inspect persisted workflow runs and events in Agent Runs.
+- Keep scanned opportunities separate from full Job workspaces until they are promoted.
+- Prepare and retain Job-specific interview practice in the Interview area.
 - Inspect archetype fit, extracted keywords, evaluation notes, and truth warnings.
-- Track application status locally in `localStorage`.
+- Prepare a local browser-agent application workflow from a job link with a human confirmation gate.
+- Track Job workflow state in the local `career/career-ops.db` SQLite store.
 - Store application URLs and follow-up notes on your machine.
-- Prepare manual HR, LinkedIn, and email drafts.
+- Prepare HR, LinkedIn, and email drafts.
 
-The console does not crawl job boards, does not submit applications, and does not create production user accounts.
+The Application Agent panel models local browser automation for scanning and preparing applications, but it does not bypass login, does not submit final applications, and does not create production user accounts.
+
+### Edit the Main Resume Page
+
+The public resume route is the WYSIWYG surface. In local dev, use the `Edit Mode` toggle on the main resume page:
+
+- OFF keeps the resume as a clean preview.
+- ON adds dashed module chrome, hover actions, section ordering handles, and a right-side module editor drawer.
+- Work Experience, Projects, and Skills drawers include an AI optimization area for reviewed Studio/Prompt content.
+- Local draft saving uses browser storage and does not mutate `src/data/resume-en.json` or `src/data/resume-zh.json`.
+
+### Git Hooks
+
+Install the tracked pre-commit hook once per clone:
+
+```bash
+npm run hooks:install
+```
+
+The hook formats staged text files, runs ESLint, and runs `npm run career:test`. If formatting changes a staged file, stage the formatted result and commit again.
 
 ## Privacy Boundary
 
-The public resume site defaults to the resume page. The local `/career` console stays disabled unless you are running the Vite dev server and set `VITE_ENABLE_CAREER_CONSOLE=true`.
+The public resume site defaults to the resume page. While running the Vite dev server, the local `/career` console and homepage `Career-Ops` entry are available automatically. Production builds do not expose the local console.
 
-Keep JD text, truth warnings, evaluation markdown, application links, recruiter messages, and follow-up notes out of public build artifacts. Run `npm run resume:manifest` after local resume generation so `src/data/resume-versions.json` remains public-safe and `src/data/career-versions.local.json` stays local-only and git-ignored.
+Keep JD text, truth warnings, evaluation markdown, application links, recruiter messages, and follow-up notes out of public build artifacts. `career/career-ops.db`, `career/jobs/`, and `src/data/career-versions.local.json` are local-only and git-ignored. Run `npm run resume:manifest` after local resume generation so `src/data/resume-versions.json` remains public-safe.
 
 Before publishing, verify the public manifest:
 

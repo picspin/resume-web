@@ -18,6 +18,7 @@ const EMPTY_FORM = {
 }
 
 const noopDraftChange = () => {}
+const noopApplyDraft = () => {}
 
 function readPortfolioDraft() {
   if (typeof window === 'undefined') return null
@@ -59,7 +60,11 @@ async function copyToClipboard(text) {
   }
 }
 
-export default function PortfolioStudio({ onDraftChange = noopDraftChange }) {
+export default function PortfolioStudio({
+  onDraftChange = noopDraftChange,
+  onApplyProject = noopApplyDraft,
+  onApplySkills = noopApplyDraft,
+}) {
   const [form, setForm] = useState(EMPTY_FORM)
   const [draft, setDraft] = useState(null)
   const [copied, setCopied] = useState('')
@@ -112,8 +117,8 @@ export default function PortfolioStudio({ onDraftChange = noopDraftChange }) {
           </p>
           <h2 className="mt-1 text-xl font-semibold">Project and skills draft builder</h2>
           <p className="mt-2 max-w-3xl text-sm text-gray-600">
-            Convert new GitHub work, medical product evidence, and JD context into a review payload for the web resume.
-            No files are changed until you manually approve and apply the patch.
+            Convert new GitHub work, medical product evidence, and JD context into resume-ready project and skill elements.
+            Apply only the pieces you approve into the editable resume canvas.
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -270,6 +275,21 @@ export default function PortfolioStudio({ onDraftChange = noopDraftChange }) {
               <div className="flex flex-wrap gap-2">
                 <button
                   type="button"
+                  onClick={() => onApplyProject(draft)}
+                  className="inline-flex items-center gap-2 rounded-md bg-teal-700 px-3 py-2 text-sm font-medium text-white hover:bg-teal-800 focus:outline-none focus:ring-2 focus:ring-teal-600 focus:ring-offset-2"
+                >
+                  <FileText className="h-4 w-4" />
+                  Apply project to resume
+                </button>
+                <button
+                  type="button"
+                  onClick={() => onApplySkills(draft)}
+                  className="inline-flex items-center gap-2 rounded-md border border-teal-700 px-3 py-2 text-sm font-medium text-teal-800 hover:bg-teal-50 focus:outline-none focus:ring-2 focus:ring-teal-600 focus:ring-offset-2"
+                >
+                  Apply skills to resume
+                </button>
+                <button
+                  type="button"
                   onClick={() => copyDraft('AI prompt copied', draft.aiPrompt)}
                   className="inline-flex items-center gap-2 rounded-md border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-teal-600 focus:ring-offset-2"
                 >
@@ -287,25 +307,29 @@ export default function PortfolioStudio({ onDraftChange = noopDraftChange }) {
               </div>
               {copied && <p className="text-xs text-gray-500">{copied}</p>}
 
-              <div>
-                <h3 className="text-sm font-semibold text-gray-800">AI polish prompt</h3>
-                <textarea
-                  readOnly
-                  value={draft.aiPrompt}
-                  rows={8}
-                  className="mt-2 w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 font-mono text-xs text-gray-700"
-                />
-              </div>
-
-              <div>
-                <h3 className="text-sm font-semibold text-gray-800">Review payload</h3>
-                <textarea
-                  readOnly
-                  value={jsonPatchText}
-                  rows={8}
-                  className="mt-2 w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 font-mono text-xs text-gray-700"
-                />
-              </div>
+              <details className="rounded-md border border-gray-200 bg-gray-50 p-3">
+                <summary className="cursor-pointer text-sm font-semibold text-gray-800">Review payload and AI polish prompt</summary>
+                <div className="mt-3 grid grid-cols-1 gap-3">
+                  <label className="block text-sm font-semibold text-gray-800">
+                    AI polish prompt
+                    <textarea
+                      readOnly
+                      value={draft.aiPrompt}
+                      rows={7}
+                      className="mt-2 w-full rounded-md border border-gray-300 bg-white px-3 py-2 font-mono text-xs text-gray-700"
+                    />
+                  </label>
+                  <label className="block text-sm font-semibold text-gray-800">
+                    Review payload
+                    <textarea
+                      readOnly
+                      value={jsonPatchText}
+                      rows={7}
+                      className="mt-2 w-full rounded-md border border-gray-300 bg-white px-3 py-2 font-mono text-xs text-gray-700"
+                    />
+                  </label>
+                </div>
+              </details>
             </>
           ) : (
             <div className="flex min-h-full items-center justify-center rounded-md border border-dashed border-gray-300 bg-gray-50 p-6 text-center text-sm text-gray-600">
