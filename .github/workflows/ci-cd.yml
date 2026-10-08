@@ -42,7 +42,7 @@ jobs:
           VITE_BASE_PATH: /resume-web/
         run: npm run build
       - name: Upload validated Pages artifact
-        if: github.event_name == 'workflow_dispatch' && inputs.deploy && vars.PAGES_ENABLED == 'true' && github.ref == 'refs/heads/main'
+        if: github.event_name == 'workflow_dispatch' && inputs.deploy && github.ref == 'refs/heads/main'
         uses: actions/upload-pages-artifact@v3
         with:
           path: dist/
@@ -50,7 +50,7 @@ jobs:
   deploy:
     name: Deploy to GitHub Pages
     needs: [test, security-scan]
-    if: github.event_name == 'workflow_dispatch' && inputs.deploy && vars.PAGES_ENABLED == 'true' && github.ref == 'refs/heads/main'
+    if: github.event_name == 'workflow_dispatch' && inputs.deploy && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     permissions:
       pages: write

@@ -249,16 +249,16 @@ the test uses Playwright's bundled Chromium.
 
 Work on a branch, open a PR, and complete review before merging into `main`.
 Pushes and PRs validate only. Deployment requires a manual run on `main` with
-the `deploy` input enabled AND repository variable `PAGES_ENABLED=true`.
+the `deploy` input enabled. No repository variable is required.
 That run validates again and uses the exact validated `dist/` artifact without
 rebuilding. Pages write and OIDC permissions
 are restricted to the deploy job; the `pages` concurrency group serializes it.
 
-Pages is currently unconfigured: both repositories report `has_pages:false`,
-and the available token receives HTTP 403 from the Pages API. No live deployment
-is claimed. Leave `PAGES_ENABLED` unset until an authorized user has configured
-Pages for this repository and confirmed its availability. The gate does not
-activate Pages or resolve token/account restrictions.
+Pages for `picspin/resume-web` is configured to use GitHub Actions. The
+`configure-pages` step verifies that configuration before deployment; a manual
+dispatch does not bypass token permissions or account restrictions. A successful
+test/build run alone does not mean the site has been deployed: check the deploy
+job and its reported URL.
 
 Configure Pages to use GitHub Actions and require `Test and Build` plus review
 approval in branch protection. Additional deployment approval can be configured
