@@ -73,7 +73,7 @@ export function createResumeStorage(options = {}) {
   // serialize cooperating browser tabs so revision checks cover cross-tab edits.
   function transaction(action) {
     return Promise.resolve().then(() => {
-      if (globalThis.navigator?.locks?.request) return globalThis.navigator.locks.request(key, () => action())
+      if (typeof window !== 'undefined' && globalThis.navigator?.locks?.request) return globalThis.navigator.locks.request(key, () => action())
       return action()
     })
   }

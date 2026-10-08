@@ -13,6 +13,25 @@ function fixture() {
   return { data, backend, storage: createResumeStorage({ storage: backend }) }
 }
 
+test('Node navigator locks are not used for local storage transactions', async () => {
+  const previous = Object.getOwnPropertyDescriptor(globalThis, 'navigator')
+  let requests = 0
+  Object.defineProperty(globalThis, 'navigator', {
+    configurable: true,
+    value: { locks: { request: () => { requests += 1; throw new Error('Unexpected Node lock') } } },
+  })
+  try {
+    const { storage } = fixture()
+    const original = (await storage.loadLibrary()).documents[0]
+    await storage.saveDocument(original, { expectedRevision: original.revision })
+    await assert.rejects(storage.saveDocument(original, { expectedRevision: original.revision }), { code: 'conflict' })
+    assert.equal(requests, 0)
+  } finally {
+    if (previous) Object.defineProperty(globalThis, 'navigator', previous)
+    else delete globalThis.navigator
+  }
+})
+
 // Compare every actual fixture field, allowing additional editor defaults.
 function contains(actual, expected, path = 'resume') {
   if (expected && typeof expected === 'object') {
