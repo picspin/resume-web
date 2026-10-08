@@ -11,10 +11,12 @@ export default function Header({
   setSelectedVersion,
   languageDisabled = false,
   showDownload = true,
+  showLanguage = true,
 }) {
   return (
-    <div className="no-print flex justify-between items-center mb-8">
+    <div className="no-print flex flex-wrap gap-3 justify-between items-center mb-8">
       <div className="flex items-center space-x-2">
+      {showLanguage && <>
         <button
           className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
             lang === 'en'
@@ -39,6 +41,7 @@ export default function Header({
           <Globe className="w-4 h-4 inline mr-1" />
           中文
         </button>
+      </>}
       </div>
 
       <div className="flex items-center space-x-2">
@@ -48,6 +51,7 @@ export default function Header({
             value={selectedVersion}
             onChange={(event) => setSelectedVersion(event.target.value)}
             title={lang === 'en' ? 'Resume version' : '简历版本'}
+            aria-label="Published resume version"
           >
             <option value="default">{lang === 'en' ? 'Default' : '默认'}</option>
             {versions.map((version) => (

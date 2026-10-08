@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto'
 import { mkdir, readFile, readdir, rm, writeFile } from 'node:fs/promises'
 import { dirname, join, relative, resolve } from 'node:path'
 import { DatabaseSync } from 'node:sqlite'
+import { snapshotSourceDocument, validateRequestId } from '../resume-ops/lib/workflow-source.mjs'
 
 const JOB_STAGE = 'jd_intake'
 const JOB_STATUS = 'active'
@@ -40,7 +41,9 @@ function normalizeJobInput(input = {}) {
 
   const slug = slugify([company, roleTitle].filter(Boolean).join(' '))
   if (!slug) throw new Error('Could not create a safe job slug.')
-  return { company, roleTitle, jdText, sourceUrl, slug }
+  const sourceDocument = input.sourceDocument === undefined ? undefined : snapshotSourceDocument(input.sourceDocument)
+  const requestId = input.requestId === undefined ? randomUUID() : validateRequestId(input.requestId)
+  return { company, roleTitle, jdText, sourceUrl, slug, sourceDocument, requestId }
 }
 
 function renderJobMarkdown(job) {
@@ -71,6 +74,8 @@ function mapJobRow(row) {
     createdAt: row.created_at,
     updatedAt: row.updated_at,
     legacySlug: row.legacy_slug || '',
+    sourceDocument: row.source_document_json ? snapshotSourceDocument(JSON.parse(row.source_document_json)) : undefined,
+    requestId: row.request_id || undefined,
   }
 }
 
@@ -247,6 +252,9 @@ export function createCareerOpsKernel({
           created_at TEXT NOT NULL
         );
       `)
+      const columns = database.prepare('PRAGMA table_info(jobs)').all().map((column) => column.name)
+      if (!columns.includes('source_document_json')) database.exec('ALTER TABLE jobs ADD COLUMN source_document_json TEXT')
+      if (!columns.includes('request_id')) database.exec('ALTER TABLE jobs ADD COLUMN request_id TEXT')
       await importLegacyVersions({ database, rootDir, clock })
     },
 
@@ -279,8 +287,8 @@ export function createCareerOpsKernel({
         database.prepare(`
           INSERT INTO jobs (
             id, slug, company, role_title, jd_text, source_url,
-            stage, status, created_at, updated_at, legacy_slug
-          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL)
+            stage, status, created_at, updated_at, legacy_slug, source_document_json, request_id
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, ?, ?)
         `).run(
           job.id,
           job.slug,
@@ -292,6 +300,8 @@ export function createCareerOpsKernel({
           job.status,
           job.createdAt,
           job.updatedAt,
+          job.sourceDocument ? JSON.stringify(job.sourceDocument) : null,
+          job.requestId,
         )
       } catch (error) {
         await rm(workspaceDir, { recursive: true, force: true })

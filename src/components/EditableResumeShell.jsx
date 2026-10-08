@@ -1,15 +1,11 @@
-import { useMemo, useState } from 'react'
-import { Copy, GripVertical, Plus, RefreshCw, Save, Trash2, Wand2, X } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
+import { ArrowDown, ArrowUp, Copy, Download, EyeOff, GripVertical, Pencil, Plus, Save, Trash2, X } from 'lucide-react'
 import ResumeSection from './ResumeSection'
-import {
-  addResumeItem,
-  createEditableResume,
-  removeResumeItem,
-  saveResumeWorkbenchDraft,
-  updateResumeItemField,
-} from '../career/resumeWorkbenchState.js'
+import ResumeProfile from './ResumeProfile'
+import { readResumeImage, safeImageUrl } from './projectImages.js'
 
 export const RESUME_MODULES = [
+  { key: 'summary', title: 'Summary' },
   { key: 'education', title: 'Education' },
   { key: 'work', title: 'Work Experience' },
   { key: 'skills', title: 'Skills' },
@@ -20,392 +16,142 @@ export const RESUME_MODULES = [
   { key: 'patents', title: 'Patents' },
 ]
 
-const AI_MODULES = new Set(['work', 'skills', 'projects'])
-
-const FIELD_SCHEMAS = {
+export const FIELD_SCHEMAS = {
+  general: ['name', 'headline', 'location', 'photo', 'address', 'email_work', 'email_private', 'tel', 'banner'],
   education: ['degree', 'major', 'institution', 'date', 'year'],
   work: ['title', 'company', 'location', 'date', 'details'],
   skills: ['value'],
   certificates: ['title', 'organization', 'date'],
-  projects: ['title', 'description', 'image', 'url'],
-  publications: ['title', 'journal', 'link'],
-  posters: ['title', 'authors', 'event'],
+  projects: ['title', 'description', 'image', 'link', 'projectNumber'],
+  publications: ['type', 'title', 'authors', 'journal', 'link'],
+  posters: ['title', 'authors', 'event', 'conference', 'date', 'link'],
   patents: ['title', 'authors', 'link'],
 }
+const titleFor = key => RESUME_MODULES.find(module => module.key === key)?.title || 'Profile'
+const clone = value => JSON.parse(JSON.stringify(value))
+const emptyItem = key => key === 'skills' ? '' : Object.fromEntries((FIELD_SCHEMAS[key] || []).filter(field => field !== 'projectNumber').map(field => [field, field === 'details' ? [] : '']))
 
-const EMPTY_ITEMS = {
-  education: { degree: '', major: '', institution: '', date: '', year: '' },
-  work: { title: '', company: '', location: '', date: '', details: [''] },
-  skills: 'Medical AI & Digital Health: ',
-  certificates: { title: '', organization: '', date: '' },
-  projects: { title: '', description: '', image: '/images/projects/fallback.jpg', url: '' },
-  publications: { title: '', journal: '', link: '' },
-  posters: { title: '', authors: '', event: '' },
-  patents: { title: '', authors: '', link: '' },
+export function IconButton({ label, icon: Icon, ...props }) {
+  return <button type="button" className="resume-icon" title={label} aria-label={label} {...props}><Icon size={16} /></button>
 }
 
-const RESUME_THEMES = [
-  { key: 'github', label: 'GitHub' },
-  { key: 'nord', label: 'Nord' },
-  { key: 'monokai', label: 'Monokai' },
-]
-
-function getModuleTitle(sectionKey) {
-  return RESUME_MODULES.find((module) => module.key === sectionKey)?.title || 'Resume module'
-}
-
-function getSectionItems(data, sectionKey) {
-  const items = data?.[sectionKey]
-  return Array.isArray(items) ? items : []
-}
-
-function normalizeDrawerFieldValue(field, value) {
-  if (field === 'details') {
-    return String(value)
-      .split('\n')
-      .map((line) => line.trim())
-      .filter(Boolean)
-  }
-  return value
-}
-
-function FieldInput({ sectionKey, item, field, itemIndex, onUpdateField }) {
-  const id = `${sectionKey}-${itemIndex}-${field}`
-  const value = field === 'value'
-    ? String(item || '')
-    : Array.isArray(item?.[field])
-      ? item[field].join('\n')
-      : String(item?.[field] || '')
-  const isLong = field === 'details' || field === 'description' || value.length > 96
-
-  return (
-    <label htmlFor={id} className="block text-xs font-medium text-gray-600 dark:text-gray-300">
-      {field === 'value' ? getModuleTitle(sectionKey) : field.replace(/^\w/, (letter) => letter.toUpperCase())}
-      {isLong ? (
-        <textarea
-          id={id}
-          rows={field === 'details' || field === 'description' ? 4 : 3}
-          value={value}
-          onChange={(event) => onUpdateField(itemIndex, field === 'value' ? '' : field, normalizeDrawerFieldValue(field, event.target.value))}
-          className="mt-1 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
-        />
-      ) : (
-        <input
-          id={id}
-          value={value}
-          onChange={(event) => onUpdateField(itemIndex, field === 'value' ? '' : field, event.target.value)}
-          className="mt-1 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
-        />
-      )}
-    </label>
-  )
-}
-
-function AIOptimizationBlock({ sectionKey }) {
-  if (!AI_MODULES.has(sectionKey)) return null
-
-  return (
-    <section className="mt-5 rounded-lg border border-dashed border-blue-300 bg-blue-50 p-4 text-sm text-blue-950 dark:border-blue-700 dark:bg-blue-950/30 dark:text-blue-100">
-      <div className="flex items-center gap-2 font-semibold">
-        <Wand2 className="h-4 w-4" />
-        AI optimization
-      </div>
-      <p className="mt-2 text-xs leading-relaxed">
-        Import from Studio or Prompts, review the wording here, then save the local draft before rendering a tailored resume.
-      </p>
-      <div className="mt-3 flex flex-wrap gap-2">
-        <button type="button" className="rounded-md border border-blue-300 bg-white px-3 py-2 text-xs font-medium text-blue-800 hover:bg-blue-50">
-          Import from Studio
-        </button>
-        <button type="button" className="rounded-md border border-blue-300 bg-white px-3 py-2 text-xs font-medium text-blue-800 hover:bg-blue-50">
-          Fill from Prompts
-        </button>
-      </div>
-    </section>
-  )
-}
-
-export function ModuleEditDrawer({
-  sectionKey,
-  data,
-  onClose = () => {},
-  onUpdateField = () => {},
-  onSave = () => {},
-  onExportPdf = () => {},
-}) {
-  if (!sectionKey) return null
-
-  const fields = FIELD_SCHEMAS[sectionKey] || []
-  const items = getSectionItems(data, sectionKey)
-
-  return (
-    <aside
-      className="fixed right-0 top-0 z-40 h-full w-full max-w-md overflow-y-auto border-l border-gray-200 bg-white p-5 shadow-2xl dark:border-gray-700 dark:bg-gray-900"
-      aria-label={`${getModuleTitle(sectionKey)} module editor`}
-    >
-      <div className="mb-5 flex items-start justify-between gap-4">
-        <div>
-          <p className="text-xs font-medium uppercase tracking-wide text-blue-700 dark:text-blue-300">Module editor</p>
-          <h2 className="mt-1 text-xl font-semibold text-gray-950 dark:text-gray-50">{getModuleTitle(sectionKey)}</h2>
-        </div>
-        <button
-          type="button"
-          onClick={onClose}
-          aria-label="Close module editor"
-          className="rounded-md border border-gray-300 p-2 text-gray-600 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-800"
-        >
-          <X className="h-4 w-4" />
-        </button>
-      </div>
-
-      <div className="space-y-4">
-        {items.length === 0 ? (
-          <div className="rounded-lg border border-dashed border-gray-300 p-4 text-sm text-gray-600 dark:border-gray-700 dark:text-gray-300">
-            No entries yet. Add one from the module controls on the resume canvas.
-          </div>
-        ) : (
-          items.map((item, itemIndex) => (
-            <section key={`${sectionKey}-${itemIndex}`} className="rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-800/60">
-              <div className="mb-3 flex items-center justify-between">
-                <span className="text-xs font-semibold uppercase tracking-wide text-gray-500">Entry {itemIndex + 1}</span>
-                <span className="text-xs text-gray-400">review before save</span>
-              </div>
-              <div className="grid grid-cols-1 gap-3">
-                {fields.map((field) => (
-                  <FieldInput
-                    key={field}
-                    sectionKey={sectionKey}
-                    item={item}
-                    field={field}
-                    itemIndex={itemIndex}
-                    onUpdateField={onUpdateField}
-                  />
-                ))}
-              </div>
-            </section>
-          ))
-        )}
-      </div>
-
-      <AIOptimizationBlock sectionKey={sectionKey} />
-
-      <div className="mt-5 flex flex-wrap gap-2 border-t border-gray-200 pt-4 dark:border-gray-700">
-        <button
-          type="button"
-          onClick={onSave}
-          className="inline-flex items-center gap-2 rounded-md bg-blue-700 px-3 py-2 text-sm font-medium text-white hover:bg-blue-800"
-        >
-          <Save className="h-4 w-4" />
-          Save local draft
-        </button>
-        <button type="button" className="inline-flex items-center gap-2 rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-800">
-          <RefreshCw className="h-4 w-4" />
-          Re-render preview
-        </button>
-        <button
-          type="button"
-          onClick={onExportPdf}
-          className="inline-flex items-center gap-2 rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-800"
-        >
-          Export PDF
-        </button>
-      </div>
-    </aside>
-  )
-}
-
-export default function EditableResumeShell({
-  data,
-  initiallyEditing = false,
-  initiallySelectedSection = null,
-  careerConsoleAvailable = false,
-  portfolioDraft = null,
-  onExportPdf = () => {},
-}) {
-  const [editing, setEditing] = useState(initiallyEditing)
-  const [selectedSection, setSelectedSection] = useState(initiallySelectedSection)
-  const [resumeDraft, setResumeDraft] = useState(() => createEditableResume(data))
-  const [sectionOrder, setSectionOrder] = useState(RESUME_MODULES.map((module) => module.key))
-  const [themeIndex, setThemeIndex] = useState(0)
-
-  const visibleResume = useMemo(() => createEditableResume(resumeDraft || data), [resumeDraft, data])
-  const activeTheme = RESUME_THEMES[themeIndex] || RESUME_THEMES[0]
-
-  const closeDrawer = () => setSelectedSection(null)
-
-  const addItem = (sectionKey) => {
-    setResumeDraft((current) => addResumeItem(current, sectionKey, EMPTY_ITEMS[sectionKey] ?? {}))
-    setSelectedSection(sectionKey)
-  }
-
-  const duplicateFirstItem = (sectionKey) => {
-    const [firstItem] = getSectionItems(visibleResume, sectionKey)
-    setResumeDraft((current) => addResumeItem(current, sectionKey, firstItem || EMPTY_ITEMS[sectionKey] || {}))
-    setSelectedSection(sectionKey)
-  }
-
-  const deleteLastItem = (sectionKey) => {
-    const items = getSectionItems(visibleResume, sectionKey)
-    if (items.length === 0) return
-    setResumeDraft((current) => removeResumeItem(current, sectionKey, items.length - 1))
-    setSelectedSection(sectionKey)
-  }
-
-  const updateField = (sectionKey, itemIndex, fieldPath, value) => {
-    setResumeDraft((current) => updateResumeItemField(current, sectionKey, itemIndex, fieldPath, value))
-  }
-
-  const moveSection = (sectionKey, direction) => {
-    setSectionOrder((current) => {
-      const next = [...current]
-      const index = next.indexOf(sectionKey)
-      const target = index + direction
-      if (index < 0 || target < 0 || target >= next.length) return current
-      const [removed] = next.splice(index, 1)
-      next.splice(target, 0, removed)
-      return next
-    })
-  }
-
-  const renderSectionChrome = (section, renderedSection) => (
-    <section
-      key={section.key}
-      data-editable-section={section.key}
-      className={`group relative rounded-2xl border border-dashed p-1 transition ${
-        selectedSection === section.key
-          ? 'border-blue-500 ring-2 ring-blue-400/60'
-          : 'border-blue-300/80 hover:border-blue-500'
-      }`}
-    >
-      <div className="absolute -left-10 top-8 hidden flex-col gap-2 lg:flex">
-        <button
-          type="button"
-          aria-label={`Move ${section.title} up`}
-          onClick={() => moveSection(section.key, -1)}
-          className="rounded-md border border-gray-300 bg-white px-2 py-1 text-xs text-gray-600 shadow-sm hover:bg-gray-50"
-        >
-          ↑
-        </button>
-        <span className="inline-flex items-center gap-1 rounded-md border border-gray-300 bg-white px-2 py-1 text-xs text-gray-600 shadow-sm">
-          <GripVertical className="h-3.5 w-3.5" />
-          Drag handle
-        </span>
-        <button
-          type="button"
-          aria-label={`Move ${section.title} down`}
-          onClick={() => moveSection(section.key, 1)}
-          className="rounded-md border border-gray-300 bg-white px-2 py-1 text-xs text-gray-600 shadow-sm hover:bg-gray-50"
-        >
-          ↓
-        </button>
-      </div>
-      <div className="absolute right-4 top-4 z-10 hidden flex-wrap gap-2 group-hover:flex group-focus-within:flex">
-        <button
-          type="button"
-          onClick={() => setSelectedSection(section.key)}
-          className="rounded-md bg-blue-700 px-3 py-1.5 text-xs font-medium text-white shadow-sm hover:bg-blue-800"
-        >
-          Edit module
-        </button>
-        <button
-          type="button"
-          onClick={() => duplicateFirstItem(section.key)}
-          className="rounded-md border border-gray-300 bg-white p-1.5 text-gray-600 shadow-sm hover:bg-gray-50"
-          aria-label={`Duplicate ${section.title}`}
-        >
-          <Copy className="h-3.5 w-3.5" />
-        </button>
-        <button
-          type="button"
-          onClick={() => deleteLastItem(section.key)}
-          className="rounded-md border border-gray-300 bg-white p-1.5 text-gray-600 shadow-sm hover:bg-gray-50"
-          aria-label={`Delete ${section.title} entry`}
-        >
-          <Trash2 className="h-3.5 w-3.5" />
-        </button>
-        <button
-          type="button"
-          onClick={() => addItem(section.key)}
-          className="rounded-md border border-gray-300 bg-white p-1.5 text-gray-600 shadow-sm hover:bg-gray-50"
-          aria-label={`Add ${section.title} entry`}
-        >
-          <Plus className="h-3.5 w-3.5" />
-        </button>
-      </div>
-      {renderedSection}
-    </section>
-  )
-
-  const saveDraft = () => {
-    saveResumeWorkbenchDraft(visibleResume)
-  }
-
-  return (
-    <div className={`resume-theme-${activeTheme.key} ${activeTheme.key === 'github' ? '' : 'rounded-2xl p-2'}`}>
-      <div className="no-print sticky top-3 z-30 mb-6 flex flex-wrap items-center justify-end gap-2">
-        <button
-          type="button"
-          onClick={() => {
-            setEditing((value) => !value)
-            if (editing) closeDrawer()
-          }}
-          className={`rounded-md border px-3 py-2 text-sm font-medium shadow-sm transition ${
-            editing
-              ? 'border-blue-700 bg-blue-700 text-white'
-              : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100'
-          }`}
-          aria-pressed={editing}
-        >
-          Edit Mode {editing ? 'ON' : 'OFF'}
-        </button>
-        <button
-          type="button"
-          onClick={() => setThemeIndex((value) => (value + 1) % RESUME_THEMES.length)}
-          className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 shadow-sm hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
-        >
-          Theme: {activeTheme.label}
-        </button>
-        <button
-          type="button"
-          onClick={saveDraft}
-          className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 shadow-sm hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
-        >
-          Save draft
-        </button>
-        <button
-          type="button"
-          onClick={onExportPdf}
-          className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 shadow-sm hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
-        >
-          Export PDF
-        </button>
-        {careerConsoleAvailable && (
-          <a
-            href="/career"
-            className="rounded-md bg-blue-700 px-3 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-800"
-          >
-            Career-Ops
-          </a>
-        )}
-      </div>
-
-      <ResumeSection
-        data={visibleResume}
-        sectionOrder={sectionOrder}
-        renderSectionChrome={editing ? renderSectionChrome : undefined}
-      />
-
-      {editing && selectedSection && (
-        <ModuleEditDrawer
-          sectionKey={selectedSection}
-          data={visibleResume}
-          onClose={closeDrawer}
-          onSave={saveDraft}
-          onExportPdf={onExportPdf}
-          onUpdateField={(itemIndex, fieldPath, value) => updateField(selectedSection, itemIndex, fieldPath, value)}
-          portfolioDraft={portfolioDraft}
-        />
-      )}
+function ImageField({ id, value, onChange }) {
+  const [error, setError] = useState('')
+  return <div className="resume-image-field">
+    <input id={id} value={value} placeholder="https://" onChange={event => { setError(''); onChange(event.target.value) }} onBlur={() => setError(value && !safeImageUrl(value) ? 'Use an HTTPS image URL or upload a raster image.' : '')} />
+    {safeImageUrl(value) && <img src={safeImageUrl(value)} alt="Image preview" />}
+    <div className="flex flex-wrap gap-2 items-center">
+      <input aria-label="Upload image" type="file" accept="image/png,image/jpeg,image/webp,image/gif" onChange={async event => {
+        const file = event.target.files?.[0]
+        event.target.value = ''
+        if (!file) return
+        try { onChange(await readResumeImage(file)); setError('') } catch (cause) { setError(cause.message) }
+      }} />
+      <IconButton label="Clear image" icon={Trash2} onClick={() => { onChange(''); setError('') }} />
     </div>
-  )
+    {error && <p role="alert">{error}</p>}
+  </div>
+}
+
+export function ModuleEditDrawer({ sectionKey, data, selectedField, selectedIndex, onClose = () => {}, onUpdateField = () => {}, onTitle = () => {}, onSave = () => {}, onExportPdf = () => {}, onAdd = () => {}, onDelete = () => {}, onDuplicate = () => {}, onMove = () => {} }) {
+  const panel = useRef(null)
+  const dragIndex = useRef(null)
+  useEffect(() => {
+    const previous = document.activeElement
+    const target = panel.current?.querySelector(`[data-field="${selectedField || 'sectionTitle'}"][data-index="${selectedIndex ?? 0}"] input, [data-field="${selectedField || 'sectionTitle'}"][data-index="${selectedIndex ?? 0}"] textarea`)
+    ;(target || panel.current?.querySelector('input, textarea, button'))?.focus()
+    return () => previous?.focus?.()
+  }, [sectionKey, selectedField, selectedIndex])
+  if (!sectionKey) return null
+  const items = sectionKey === 'general' ? [{ ...data.general, banner: data.banner }] : sectionKey === 'summary' ? [{ summary: data.summary }] : data[sectionKey] || []
+  const fields = sectionKey === 'summary' ? ['summary'] : FIELD_SCHEMAS[sectionKey] || []
+  const input = (item, index, field) => {
+    const value = field === 'value' ? item : item[field] ?? ''
+    const id = `resume-${sectionKey}-${index}-${field}`
+    const change = value => onUpdateField(index, field === 'value' ? '' : field, field === 'details' ? value.split('\n') : field === 'projectNumber' ? (value === '' ? undefined : Number(value)) : value)
+    return <div key={field} data-field={field} data-index={index} className="resume-drawer-field"><label htmlFor={id}>{field.replaceAll('_', ' ')}</label>
+      {['image', 'photo', 'banner'].includes(field) ? <ImageField id={id} value={value} onChange={change} />
+        : ['details', 'description', 'summary', 'value', 'authors'].includes(field) ? <textarea id={id} rows={field === 'summary' ? 6 : 3} value={Array.isArray(value) ? value.join('\n') : value} onChange={event => change(event.target.value)} />
+          : <input id={id} type={field === 'projectNumber' ? 'number' : 'text'} min={field === 'projectNumber' ? 1 : undefined} value={value} onChange={event => change(event.target.value)} />}
+    </div>
+  }
+  return <div className="resume-drawer-backdrop no-print" onMouseDown={event => { if (event.target === event.currentTarget) onClose() }}>
+    <aside ref={panel} role="dialog" aria-modal="true" aria-label={`${titleFor(sectionKey)} module editor`} className={`resume-drawer resume-drawer-${sectionKey}`} onKeyDown={event => {
+      if (event.key === 'Escape') onClose()
+      if (event.key === 'Tab') {
+        const nodes = [...panel.current.querySelectorAll('button:not(:disabled), input, textarea, select, a[href]')]
+        const first = nodes[0]; const last = nodes.at(-1)
+        if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last?.focus() }
+        if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus() }
+      }
+    }}>
+      <header><div><small>Module editor</small><h2>{titleFor(sectionKey)}</h2></div><IconButton label="Close module editor" icon={X} onClick={onClose} /></header>
+      {sectionKey !== 'general' && <div className="resume-drawer-field" data-field="sectionTitle" data-index="0"><label htmlFor="resume-section-title">Section title</label><input id="resume-section-title" value={data.sectionTitles?.[sectionKey] ?? titleFor(sectionKey)} onChange={event => onTitle(event.target.value)} /></div>}
+      {items.map((item, index) => <section key={index} data-entry-index={index} className="resume-drawer-entry" onDragOver={event => event.preventDefault()} onDrop={event => { event.preventDefault(); if (dragIndex.current !== null) onMove(dragIndex.current, index); dragIndex.current = null }}>
+        {!['general', 'summary'].includes(sectionKey) && <div className="resume-entry-tools"><span>Entry {index + 1}</span>
+          <IconButton label={`Drag entry ${index + 1}`} icon={GripVertical} draggable onPointerDown={event => { event.preventDefault(); event.currentTarget.setPointerCapture(event.pointerId); dragIndex.current = index }} onPointerUp={event => { const target = document.elementFromPoint(event.clientX, event.clientY)?.closest('[data-entry-index]'); if (target && dragIndex.current !== null) onMove(dragIndex.current, Number(target.dataset.entryIndex)); dragIndex.current = null }} onPointerCancel={() => { dragIndex.current = null }} onDragStart={event => { dragIndex.current = index; event.dataTransfer.setData('text/plain', String(index)) }} onDragEnd={() => { dragIndex.current = null }} />
+          <IconButton label={`Move entry ${index + 1} up`} icon={ArrowUp} disabled={index === 0} onClick={() => onMove(index, index - 1)} />
+          <IconButton label={`Move entry ${index + 1} down`} icon={ArrowDown} disabled={index === items.length - 1} onClick={() => onMove(index, index + 1)} />
+          <IconButton label={`Duplicate entry ${index + 1}`} icon={Copy} onClick={() => onDuplicate(index)} />
+          <IconButton label={`Delete entry ${index + 1}`} icon={Trash2} onClick={() => onDelete(index)} />
+        </div>}
+        <div className="resume-field-grid">{fields.filter(field => field !== 'projectNumber' || item.projectNumber).map(field => input(item, index, field))}</div>
+      </section>)}
+      {!['general', 'summary'].includes(sectionKey) && <button className="resume-command" onClick={onAdd}><Plus size={16} />Add entry</button>}
+      <footer><button className="resume-command" onClick={onSave}><Save size={16} />Save draft</button><button className="resume-command" onClick={onExportPdf}><Download size={16} />Export PDF</button></footer>
+    </aside>
+  </div>
+}
+
+export default function EditableResumeShell({ document: controlledDocument, onChange, data, initiallyEditing = false, initiallySelectedSection = null, careerConsoleAvailable = false, onExportPdf = () => {}, onSave = () => {}, onSync = () => {}, canEdit = true, dirty = false, busy = false, showProfile = false }) {
+  const [fallback, setFallback] = useState(() => ({ resume: clone(data || {}), theme: 'default', sectionOrder: RESUME_MODULES.map(module => module.key), hiddenSections: [] }))
+  const active = controlledDocument || fallback
+  const change = next => onChange ? onChange(next) : setFallback(next)
+  const [editing, setEditing] = useState(initiallyEditing)
+  const [selected, setSelected] = useState(initiallySelectedSection ? { key: initiallySelectedSection } : null)
+  const dragged = useRef(null)
+  const resume = active.resume
+  const order = active.sectionOrder || RESUME_MODULES.map(module => module.key)
+  const hidden = active.hiddenSections || []
+  const edit = (key, index, field) => setSelected({ key, index, field })
+  const updateResume = next => change({ ...active, resume: next })
+  const updateField = (index, field, value) => {
+    if (selected.key === 'general') return updateResume(field === 'banner' ? { ...resume, banner: value } : { ...resume, general: { ...resume.general, [field]: value } })
+    if (selected.key === 'summary') return updateResume({ ...resume, summary: value })
+    const items = [...(resume[selected.key] || [])]
+    items[index] = field ? { ...items[index], [field]: value } : value
+    if (selected.key === 'projects' && field === 'image' && !value) delete items[index].projectNumber
+    updateResume({ ...resume, [selected.key]: items })
+  }
+  const mutateItems = (key, mutate) => { const items = clone(resume[key] || []); mutate(items); updateResume({ ...resume, [key]: items }) }
+  const move = (key, to) => { const next = [...order]; const from = next.indexOf(key); if (from < 0 || to < 0 || to >= next.length) return; next.splice(to, 0, next.splice(from, 1)[0]); change({ ...active, sectionOrder: next }) }
+  const chrome = (section, content) => <section key={section.key} data-editable-section={section.key} className={`resume-editable-module ${selected?.key === section.key ? 'is-selected' : ''}`} onDragOver={event => event.preventDefault()} onDrop={event => { event.preventDefault(); if (dragged.current) move(dragged.current, order.indexOf(section.key)); dragged.current = null }}>
+    <div className="resume-module-tools no-print">
+      <IconButton label={`Drag handle: ${section.title}`} icon={GripVertical} draggable onPointerDown={event => { event.preventDefault(); event.currentTarget.setPointerCapture(event.pointerId); dragged.current = section.key }} onPointerUp={event => { const target = document.elementFromPoint(event.clientX, event.clientY)?.closest('[data-editable-section]'); if (target && dragged.current) move(dragged.current, order.indexOf(target.dataset.editableSection)); dragged.current = null }} onPointerCancel={() => { dragged.current = null }} onDragStart={event => { dragged.current = section.key; event.dataTransfer.setData('text/plain', section.key) }} onDragEnd={() => { dragged.current = null }} />
+      <IconButton label={`Move ${section.title} up`} icon={ArrowUp} disabled={order.indexOf(section.key) === 0} onClick={() => move(section.key, order.indexOf(section.key) - 1)} />
+      <IconButton label={`Move ${section.title} down`} icon={ArrowDown} disabled={order.indexOf(section.key) === order.length - 1} onClick={() => move(section.key, order.indexOf(section.key) + 1)} />
+      <IconButton label={`Edit module: ${section.title}`} icon={Pencil} onClick={() => edit(section.key)} />
+      {section.key !== 'summary' && <IconButton label={`Add ${section.title} entry`} icon={Plus} onClick={() => { mutateItems(section.key, items => items.push(emptyItem(section.key))); edit(section.key, (resume[section.key] || []).length) }} />}
+      <IconButton label={`Hide ${section.title}`} icon={EyeOff} onClick={() => change({ ...active, hiddenSections: [...hidden, section.key] })} />
+    </div>{content}
+  </section>
+  return <div className={`resume-theme-${active.theme}`}>
+    {canEdit && <div className="resume-editor-toolbar no-print">
+      <label className="resume-mode"><input type="checkbox" checked={editing} onChange={event => { setEditing(event.target.checked); setSelected(null) }} />Edit mode</label>
+      <select aria-label="Resume theme" value={active.theme} onChange={event => change({ ...active, theme: event.target.value })}>{['default', 'nord', 'monokai', 'github'].map(theme => <option key={theme} value={theme}>{theme}</option>)}</select>
+      <button className="resume-command" onClick={onSave} disabled={busy || !dirty}><Save size={16} />Save</button>
+      <button className="resume-command" onClick={onExportPdf}><Download size={16} />PDF</button>
+      <button className="resume-command" onClick={onSync} disabled={busy}>Sync</button>
+      {careerConsoleAvailable && <a className="resume-command" href="/career">Career-Ops</a>}
+      <span role="status">{dirty ? 'Unsaved changes' : 'Saved'}</span>
+      {editing && hidden.length > 0 && <select aria-label="Add module" value="" onChange={event => change({ ...active, hiddenSections: hidden.filter(key => key !== event.target.value) })}><option value="">Add module</option>{hidden.map(key => <option key={key} value={key}>{titleFor(key)}</option>)}</select>}
+    </div>}
+    {showProfile && <ResumeProfile resume={resume} editing={canEdit && editing} onSelect={field => edit('general', 0, field)} />}
+    <ResumeSection data={resume} sectionOrder={order} hiddenSections={hidden} editing={canEdit && editing} onSelect={edit} renderSectionChrome={canEdit && editing ? chrome : undefined} />
+    {canEdit && editing && selected && <ModuleEditDrawer key={selected.key} sectionKey={selected.key} selectedIndex={selected.index} selectedField={selected.field} data={resume} onClose={() => setSelected(null)} onUpdateField={updateField} onTitle={value => updateResume({ ...resume, sectionTitles: { ...resume.sectionTitles, [selected.key]: value } })} onSave={onSave} onExportPdf={onExportPdf}
+      onAdd={() => mutateItems(selected.key, items => items.push(emptyItem(selected.key)))}
+      onDelete={index => mutateItems(selected.key, items => items.splice(index, 1))}
+      onDuplicate={index => mutateItems(selected.key, items => items.splice(index + 1, 0, clone(items[index])))}
+      onMove={(from, to) => mutateItems(selected.key, items => { if (to >= 0 && to < items.length) items.splice(to, 0, items.splice(from, 1)[0]) })} />}
+  </div>
 }

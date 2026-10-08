@@ -32,3 +32,18 @@ test('can render truth notes for explicit review mode', () => {
   assert.match(html, /Truth Notes/);
   assert.match(html, /Internal note/);
 });
+
+test('blank source-backed print identity never falls back to the sample', () => {
+  for (const general of [{ name: '' }, {}, undefined]) {
+    for (const sourceMetadata of [{ sourceDocumentId: 'synthetic-source' }, { localOnly: true }]) {
+      const html = renderPrintHtml({ resume: { general, summary: 'Railway controls.' }, metadata: sourceMetadata, template });
+      assert.match(html, /<h1><\/h1>/);
+      assert.doesNotMatch(html, /Xiaolei|Medical Digital Role/);
+    }
+  }
+});
+
+test('legacy print retains its sample fallback without source metadata', () => {
+  const html = renderPrintHtml({ resume: {}, metadata: {}, template });
+  assert.match(html, /<h1>Xiaolei Zhu, PhD<\/h1>/);
+});

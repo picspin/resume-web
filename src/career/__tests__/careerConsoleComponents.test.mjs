@@ -9,6 +9,15 @@ import { renderToStaticMarkup } from 'react-dom/server'
 
 const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..', '..')
 
+test('JD workflow requires explicit saved source and does not offer an implicit master', async () => {
+  const { default: Intake } = await importJsxModule('src/career/JdIntakeHelper.jsx')
+  const html = renderToStaticMarkup(React.createElement(Intake))
+  assert.match(html, /Select a saved resume/)
+  assert.match(html, /Select a source resume/)
+  assert.match(html, /disabled=""[^>]*>.*?Run local workflow/s)
+  assert.doesNotMatch(html, /Xiaolei/)
+})
+
 async function importJsxModule(relativePath) {
   const entryPoint = path.join(projectRoot, relativePath)
   const outdir = path.join(projectRoot, '.tmp-career-tests')

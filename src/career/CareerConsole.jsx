@@ -428,6 +428,7 @@ export default function CareerConsole() {
   const [loading, setLoading] = useState(typeof window !== 'undefined')
   const [activeTab, setActiveTab] = useState('new-job')
   const [activeNewJobSlug, setActiveNewJobSlug] = useState('')
+  const [workflowVersions, setWorkflowVersions] = useState([])
 
   const reloadCareerVersions = useCallback(async () => {
     setLoading(true)
@@ -449,7 +450,7 @@ export default function CareerConsole() {
     }
   }, [reloadCareerVersions])
 
-  const versionRows = useMemo(() => deriveCareerRows({ versions: careerVersions, applicationState }), [careerVersions, applicationState])
+  const versionRows = useMemo(() => deriveCareerRows({ versions: [...workflowVersions, ...careerVersions.filter((version) => !workflowVersions.some((result) => result.slug === version.slug))], applicationState }), [careerVersions, workflowVersions, applicationState])
   const rows = useMemo(() => mergeCareerRows(versionRows, careerJobs), [versionRows, careerJobs])
   const [selectedSlug, setSelectedSlug] = useState(rows[0]?.slug || '')
   const selected = rows.find((row) => row.slug === selectedSlug) || rows[0]
@@ -461,7 +462,9 @@ export default function CareerConsole() {
     }
   }, [rows, selectedSlug])
 
-  const handleWorkflowComplete = useCallback(({ slug }) => {
+  const handleWorkflowComplete = useCallback((result) => {
+    const { slug } = result
+    setWorkflowVersions((versions) => [{ ...result, label: result.metadata?.roleLabel || slug }, ...versions.filter((version) => version.slug !== slug)])
     setActiveNewJobSlug(slug)
     setSelectedSlug(slug)
     reloadCareerVersions()

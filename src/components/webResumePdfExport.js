@@ -1,7 +1,7 @@
 export function exportWebResumePdf({
   win = globalThis.window,
   doc = globalThis.document,
-  title = 'Xiaolei Zhu - Web Resume',
+  title = 'Web Resume',
 } = {}) {
   if (!win || typeof win.print !== 'function') {
     return false

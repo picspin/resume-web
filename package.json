@@ -17,7 +17,7 @@
     "lint:fix": "eslint . --ext js,jsx --ignore-pattern dist/ --ignore-pattern node_modules/ --report-unused-disable-directives --max-warnings 0 --fix",
     "prepare": "node scripts/dev/install-hooks.mjs",
     "preview": "vite preview",
-    "career:test": "node --test src/career/__tests__/*.test.mjs src/components/__tests__/*.test.mjs scripts/dev/__tests__/*.test.mjs scripts/career-ops/__tests__/*.test.mjs",
+    "career:test": "node --test src/career/__tests__/*.test.mjs src/components/__tests__/*.test.mjs src/resume/__tests__/*.test.mjs scripts/dev/__tests__/*.test.mjs scripts/career-ops/__tests__/*.test.mjs scripts/build/__tests__/*.test.mjs",
     "resume:manifest": "node scripts/resume-ops/generate-manifest.mjs",
     "resume:test": "node --test scripts/resume-ops/__tests__/*.test.mjs",
     "resume:sync": "node scripts/resume-ops/sync-master.mjs",
@@ -43,6 +43,7 @@
     "eslint-plugin-react": "^7.32.2",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.3",
+    "espree": "^10.4.0",
     "playwright": "^1.61.1",
     "postcss": "^8.5.15",
     "tailwindcss": "^4.0.0",
@@ -50,7 +51,7 @@
   },
   "overrides": {
     "ajv": "6.15.0",
-    "brace-expansion": "1.1.17",
+    "brace-expansion": "1.1.21",
     "flatted": "3.4.2",
     "minimatch": "3.1.5",
     "tar": "7.5.21"

@@ -6,6 +6,25 @@ import test from 'node:test'
 
 import { createCareerOpsKernel } from '../kernel.mjs'
 
+test('kernel persists source identity and revision independently for same-title jobs', async (t) => {
+  const rootDir = await mkdtemp(join(tmpdir(), 'career-source-kernel-'))
+  let received
+  const kernel = createCareerOpsKernel({ rootDir, workflowRunner: async ({ job }) => { received = job; return { steps: [], requestId: job.requestId } } })
+  t.after(() => kernel.close())
+  await kernel.initialize()
+  const sourceDocument = { id: 'synthetic', revision: 3, resume: { general: { name: 'Railway Engineer' }, work: [] } }
+  const requestId = '00000000-0000-4000-8000-000000000002'
+  const first = await kernel.createJob({ roleTitle: 'Engineer', jdText: 'Controls', sourceDocument, requestId })
+  sourceDocument.resume.general.name = 'Changed after intake'
+  const second = await kernel.createJob({ roleTitle: 'Engineer', jdText: 'Controls', sourceDocument, requestId })
+  assert.notEqual(first.slug, second.slug)
+  await kernel.runStage({ jobId: first.id, stage: 'apply_pack' })
+  assert.equal(received.sourceDocument.resume.general.name, 'Railway Engineer')
+  assert.equal(received.sourceDocument.revision, 3)
+  assert.equal(received.requestId, requestId)
+  await assert.rejects(kernel.createJob({ roleTitle: 'Engineer', jdText: 'Controls', sourceDocument: null }), /Invalid source/)
+})
+
 test('createJob persists a local job workspace through the kernel interface', async (t) => {
   const rootDir = await mkdtemp(join(tmpdir(), 'career-ops-kernel-'))
   const kernel = createCareerOpsKernel({

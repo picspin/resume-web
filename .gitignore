@@ -10,6 +10,7 @@ dist/
 src/data/career-versions.local.json
 career/career-ops.db*
 career/jobs/
+career/workflow-sources/
 career/jds/*
 career/output/*
 career/versions/*

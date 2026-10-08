@@ -55,6 +55,35 @@ Use Node.js 22.13 or newer. CI and deployment use Node.js 24.
    npm run build
    ```
 
+## Local Resume Library
+
+Run `npm run dev` and open the displayed local URL. The initial resume is a
+sample, not a shared master for every document.
+
+1. Choose **Blank**, an English/Chinese **Sample**, or **Duplicate resume**.
+2. Turn on **Edit mode**. Select profile text, photos, or a section to edit its
+   dedicated drawer. Entries support adding, copying, deleting, and reordering.
+3. Choose a theme and use **Save**. Documents are stored in this browser's local
+   storage; unsaved edits are not shared with Career-Ops. Storage errors remain
+   visible instead of claiming success.
+4. Use **Versions** to save a named snapshot. Restoring creates a new document.
+5. **PDF** prints the current document with editing controls hidden and scrolling
+   content expanded. Choose Save as PDF in the browser print dialog.
+6. Open **Career-Ops**, select a saved **Source resume**, and enter a JD. A result
+   imports as an independent document. **Open in editor** selects it explicitly;
+   changing JD inputs clears the previous result actions.
+7. **Sync** prepares a GitHub preview using local `gh` authentication. Inspect the
+   repository, visibility, changed paths, and rendered content before **Publish**.
+   Only the original personal sample defaults to `picspin/meinCV`; other documents
+   require an explicit target. New repositories default to private. Hidden
+   sections and internal notes are excluded; visible contact details are included.
+
+Sync publishes a standalone HTML/JSON snapshot, not the full local application,
+and does not enable GitHub Pages. Source/target edits or remote branch changes
+require another preview. External image URLs must be replaced with uploaded or
+local approved images before publishing. Clearing browser storage removes local
+documents and versions; GitHub publication is not automatic backup.
+
 ## Common Commands
 
 | Command | Purpose |
@@ -198,9 +227,55 @@ src/
   data/                          Public resume data and public-safe manifests
 ```
 
-## CI
+## CI and Deployment
 
-Pull requests run linting, audit, tests, and production builds through GitHub Actions. The audit gate uses:
+`ci-cd.yml` is the single Pages workflow. PRs to `main`, pushes to `main` or
+`develop`, and manual runs use Node 24 and `npm ci` with `package-lock.json`.
+CI installs the locked Playwright Chromium with
+`npx --no-install playwright install --with-deps chromium`, then requires
+`lint`, `resume:test`, `career:test`, and `build` to pass in order.
+
+The JD intake browser test never silently skips when a browser is missing.
+Locally run `npx --no-install playwright install chromium`, or explicitly select
+an installed browser:
+
+```bash
+PLAYWRIGHT_CHROMIUM_CHANNEL=chrome npm run career:test
+PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH="/path/to/chromium" npm run career:test
+```
+
+The executable path takes precedence over the channel. Without either variable,
+the test uses Playwright's bundled Chromium.
+
+Work on a branch, open a PR, and complete review before merging into `main`.
+Pushes and PRs validate only. Deployment requires a manual run on `main` with
+the `deploy` input enabled AND repository variable `PAGES_ENABLED=true`.
+That run validates again and uses the exact validated `dist/` artifact without
+rebuilding. Pages write and OIDC permissions
+are restricted to the deploy job; the `pages` concurrency group serializes it.
+
+Pages is currently unconfigured: both repositories report `has_pages:false`,
+and the available token receives HTTP 403 from the Pages API. No live deployment
+is claimed. Leave `PAGES_ENABLED` unset until an authorized user has configured
+Pages for this repository and confirmed its availability. The gate does not
+activate Pages or resolve token/account restrictions.
+
+Configure Pages to use GitHub Actions and require `Test and Build` plus review
+approval in branch protection. Additional deployment approval can be configured
+on the `github-pages` environment. These settings must be configured separately;
+the workflow alone cannot enforce review approval.
+
+Production is the public static resume only. Local console APIs, SQLite, JD
+inputs, and private workflow artifacts stay local. Upload only production
+`dist/`, never the workspace or `career/`. Review public PDFs and manifests
+before publication. Build implementation owns this public/local boundary.
+
+`resume-web` is private source; `meinCV` is public output. This workflow does not
+publish across repositories. Publication to `meinCV` requires a separately
+approved, explicitly selected export; do not copy the entire source or blindly
+publish `dist/` there. Code PR delivery and Pages activation are separate steps.
+
+A separate required security job gates deployment alongside `Test and Build`:
 
 ```bash
 npm audit --audit-level moderate

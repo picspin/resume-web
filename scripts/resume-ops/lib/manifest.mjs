@@ -47,7 +47,8 @@ export function buildManifestEntry({ slug, metadata, resume, evaluationMarkdown 
 }
 
 export function buildManifests(versionRecords) {
-  const entries = versionRecords.map(buildManifestEntry);
+  // Explicit library sources never belong in build-time frontend data.
+  const entries = versionRecords.filter(({ metadata }) => !metadata.localOnly && !metadata.sourceDocumentId).map(buildManifestEntry);
   const sortByGeneratedAt = (a, b) => String(b.generatedAt || '').localeCompare(String(a.generatedAt || ''));
 
   return {

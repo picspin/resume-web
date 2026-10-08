@@ -192,24 +192,24 @@ test('EditableResumeShell enables selectable module chrome and a targeted drawer
   )
 
   assert.match(html, /data-editable-section="work"/)
-  assert.equal((html.match(/Edit module/g) || []).length, 8)
+  assert.equal((html.match(/aria-label="Edit module:/g) || []).length, 9)
   assert.match(html, /Drag handle/)
   assert.match(html, /Module editor/)
   assert.match(html, /Work Experience/)
-  assert.match(html, /AI optimization/)
+  assert.match(html, /draggable="true"/)
   assert.doesNotMatch(html, /Education editor/)
 })
 
-test('ModuleEditDrawer exposes AI optimization only for work, projects, and skills modules', async () => {
+test('ModuleEditDrawer exposes module-specific fields and functional entry controls', async () => {
   const { ModuleEditDrawer } = await importJsxModule('src/components/EditableResumeShell.jsx')
   const workHtml = renderToStaticMarkup(React.createElement(ModuleEditDrawer, { sectionKey: 'work', data: sampleResume, onClose: () => {} }))
   const educationHtml = renderToStaticMarkup(React.createElement(ModuleEditDrawer, { sectionKey: 'education', data: sampleResume, onClose: () => {} }))
 
-  assert.match(workHtml, /AI optimization/)
-  assert.match(workHtml, /Import from Studio/)
+  assert.match(workHtml, /resume-work-0-details/)
+  assert.match(workHtml, /Duplicate entry 1/)
   assert.match(workHtml, /Export PDF/)
   assert.doesNotMatch(educationHtml, /AI optimization/)
-  assert.match(educationHtml, /Degree/)
+  assert.match(educationHtml, /resume-education-0-degree/)
 })
 
 test('EditableResumeShell drawer edits update the rendered web resume before PDF export', async () => {
@@ -232,16 +232,17 @@ test('EditableResumeShell drawer edits update the rendered web resume before PDF
   assert.notEqual(resumeSection.props.data.work[0].title, 'Application Manager')
 })
 
-test('EditableResumeShell cycles visible resume themes from the toolbar', async () => {
+test('EditableResumeShell selects all document themes from the toolbar', async () => {
   const { default: EditableResumeShell } = await importJsxModule('src/components/EditableResumeShell.jsx')
   const { render } = renderWithHookDispatcher(EditableResumeShell, { data: sampleResume })
 
   let tree = render()
-  const themeButton = findElements(tree, (node) => node.type === 'button' && textContent(node.props.children).includes('Theme:'))[0]
+  const themeButton = findElements(tree, (node) => node.type === 'select' && node.props['aria-label'] === 'Resume theme')[0]
 
   assert.ok(themeButton)
-  assert.match(tree.props.className, /resume-theme-github/)
-  themeButton.props.onClick()
+  assert.match(tree.props.className, /resume-theme-default/)
+  assert.equal(textContent(themeButton.props.children), 'defaultnordmonokaigithub')
+  themeButton.props.onChange({ target: { value: 'nord' } })
 
   tree = render()
   assert.match(tree.props.className, /resume-theme-nord/)
@@ -262,4 +263,49 @@ test('Header can hide the top PDF button when the editor toolbar owns export', a
 
   assert.doesNotMatch(html, /Download PDF/)
   assert.doesNotMatch(html, />PDF</)
+})
+
+test('controlled documents render profile, custom section titles and summary and suppress hidden modules', async () => {
+  const { default: Shell } = await importJsxModule('src/components/EditableResumeShell.jsx')
+  const document = { id: 'architect', theme: 'nord', sectionOrder: ['summary', 'work'], hiddenSections: ['education'], resume: { ...sampleResume, general: { name: 'Synthetic Architect', headline: 'Landscape Architect', email_private: 'test@example.invalid' }, summary: 'Designed public gardens.', sectionTitles: { work: 'Selected Practice' } } }
+  const html = renderToStaticMarkup(React.createElement(Shell, { document, showProfile: true, canEdit: false }))
+  assert.match(html, /Synthetic Architect/)
+  assert.match(html, /Landscape Architect/)
+  assert.match(html, /test@example.invalid/)
+  assert.match(html, /Designed public gardens/)
+  assert.match(html, /Selected Practice/)
+  assert.doesNotMatch(html, /Biochemistry|Edit mode|Save draft|Sync|resume-editor-toolbar/)
+  assert.ok(html.indexOf('Designed public gardens') < html.indexOf('Selected Practice'))
+})
+
+test('field edits propagate a new controlled document without mutating source', async () => {
+  const { default: Shell } = await importJsxModule('src/components/EditableResumeShell.jsx')
+  const document = { id: 'a', theme: 'default', sectionOrder: ['work'], hiddenSections: [], resume: structuredClone(sampleResume) }
+  let updated
+  const { render } = renderWithHookDispatcher(Shell, { document, onChange: value => { updated = value }, initiallyEditing: true, initiallySelectedSection: 'work' })
+  const drawer = findElements(render(), node => node.type?.name === 'ModuleEditDrawer')[0]
+  drawer.props.onUpdateField(0, 'title', 'Architect')
+  assert.equal(updated.id, 'a')
+  assert.equal(updated.resume.work[0].title, 'Architect')
+  assert.equal(document.resume.work[0].title, 'Application Manager')
+})
+
+test('project image clearing removes numbered fallback provenance', async () => {
+  const { default: Shell } = await importJsxModule('src/components/EditableResumeShell.jsx')
+  const document = { id: 'a', theme: 'default', sectionOrder: ['projects'], hiddenSections: [], resume: { ...sampleResume, projects: [{ title: 'Project', image: '/images/projects/image.png', projectNumber: 1 }] } }
+  let updated
+  const { render } = renderWithHookDispatcher(Shell, { document, onChange: value => { updated = value }, initiallyEditing: true, initiallySelectedSection: 'projects' })
+  findElements(render(), node => node.type?.name === 'ModuleEditDrawer')[0].props.onUpdateField(0, 'image', '')
+  assert.equal(updated.resume.projects[0].image, '')
+  assert.equal(updated.resume.projects[0].projectNumber, undefined)
+})
+
+test('module rendering escapes user HTML and includes publication authors and poster events', async () => {
+  const { default: Section } = await importJsxModule('src/components/ResumeSection.jsx')
+  const html = renderToStaticMarkup(React.createElement(Section, { data: { ...sampleResume, work: [{ title: '<script>bad()</script>', details: ['<img src=x onerror=bad()>'] }], publications: [{ title: 'Paper', authors: 'A. Researcher', type: 'Journal', journal: 'Nature' }] } }))
+  assert.doesNotMatch(html, /<script>|<img src="x"/)
+  assert.match(html, /&lt;script&gt;/)
+  assert.match(html, /A. Researcher/)
+  assert.match(html, /Conference/)
+  assert.match(html, /PMI/)
 })

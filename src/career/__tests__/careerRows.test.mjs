@@ -41,3 +41,24 @@ test('builds deterministic manual apply draft', () => {
   assert.match(draft.emailBody, /Medical AI summary/);
   assert.match(draft.linkedInMessage, /Medical AI Lead/);
 });
+
+test('non-medical job drafts use only its captured result, including its signature', () => {
+  const result = { slug: 'railway', label: 'Railway Controls Engineer', sourceDocumentId: 'rail-source', resume: { general: { name: 'Morgan Test' }, summary: 'Designed railway signalling systems.' } };
+  const [row] = deriveCareerRows({ versions: [result], applicationState: { railway: { resume: { general: { name: 'Other Person' }, summary: 'Other background' }, label: 'Other job', notes: 'Keep my note' } } });
+  const draft = getDefaultApplyDraft(row);
+  for (const text of Object.values(draft)) {
+    assert.match(text, /Railway Controls Engineer/);
+    assert.match(text, /Designed railway signalling systems/);
+    assert.doesNotMatch(text, /Xiaolei|medical|healthcare|China|APAC|Other Person|Other background|Other job/i);
+  }
+  assert.match(draft.emailBody, /Best regards,\nMorgan Test$/);
+  assert.equal(row.notes, 'Keep my note');
+});
+
+test('captured source is used only when result absent; empty result never backfills sample claims', () => {
+  const sourceDocument = { resume: { general: { name: 'Source Engineer' }, summary: 'Railway evidence' } };
+  assert.match(getDefaultApplyDraft({ sourceDocument }).emailBody, /Source Engineer/);
+  const draft = getDefaultApplyDraft({ sourceDocument, sourceDocumentId: 'source', resume: { general: {}, summary: '' } });
+  assert.doesNotMatch(JSON.stringify(draft), /Source Engineer|Railway evidence|Xiaolei|medical|healthcare/i);
+  assert.doesNotMatch(JSON.stringify(getDefaultApplyDraft({ sourceDocumentId: 'missing' })), /Xiaolei|medical|healthcare/i);
+});
