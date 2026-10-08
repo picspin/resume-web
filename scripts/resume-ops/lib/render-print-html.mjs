@@ -33,6 +33,7 @@ function renderProjects(projects = []) {
 }
 
 export function renderPrintHtml({ resume, metadata, template, includeTruthNotes = false }) {
+  const sourceBacked = Boolean(metadata.sourceDocumentId) || metadata.localOnly === true;
   const contact = [
     resume.general?.address,
     resume.general?.email_private || resume.general?.email_work,
@@ -56,8 +57,8 @@ export function renderPrintHtml({ resume, metadata, template, includeTruthNotes 
 
   return template
     .replaceAll('{{LANG}}', resume.language || 'en')
-    .replaceAll('{{NAME}}', escapeHtml(resume.general?.name || 'Xiaolei Zhu, PhD'))
-    .replaceAll('{{ROLE_LABEL}}', escapeHtml(metadata.roleLabel || 'Medical Digital Role'))
+    .replaceAll('{{NAME}}', escapeHtml(resume.general?.name || (sourceBacked ? '' : 'Xiaolei Zhu, PhD')))
+    .replaceAll('{{ROLE_LABEL}}', escapeHtml(metadata.roleLabel || (sourceBacked ? '' : 'Medical Digital Role')))
     .replaceAll('{{CONTACT}}', contact)
     .replaceAll('{{BODY}}', body);
 }

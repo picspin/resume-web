@@ -41,20 +41,28 @@ export async function main(argv = process.argv.slice(2)) {
   const date = new Date().toISOString().slice(0, 10);
   const pdfName = `cv-${slug}-${date}.pdf`;
   const careerPdf = resolveCareerOutputPath({ rootDir: root, slug, fileName: `cv-{slug}-${date}.pdf` });
-  const publicPdf = resolvePublicGeneratedPath({ rootDir: root, slug, fileName: `cv-{slug}-${date}.pdf` });
+  const localOnly = argv.includes('--local-only') || metadata.localOnly === true;
+  const publicPdf = localOnly ? null : resolvePublicGeneratedPath({ rootDir: root, slug, fileName: `cv-{slug}-${date}.pdf` });
   await ensureDir(careerPdf);
-  await ensureDir(publicPdf);
+  if (publicPdf) await ensureDir(publicPdf);
 
-  const browser = await chromium.launch();
+  // Install the bundled browser with `npx playwright install chromium`, or
+  // explicitly point to an existing local Chrome/Chromium binary.
+  const browser = await chromium.launch(process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH
+    ? { executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH }
+    : {});
+  try {
   const page = await browser.newPage();
   await page.setContent(html, { waitUntil: 'networkidle' });
   await page.pdf({ path: careerPdf, format: 'A4', printBackground: true, margin: { top: '0', right: '0', bottom: '0', left: '0' } });
-  await browser.close();
-  await copyFile(careerPdf, publicPdf);
+  } finally {
+    await browser.close();
+  }
+  if (publicPdf) await copyFile(careerPdf, publicPdf);
 
   metadata.pdf = {
     careerPath: `career/output/${pdfName}`,
-    publicPath: `/generated-resumes/${pdfName}`,
+    publicPath: localOnly ? `/api/career/pdf/${encodeURIComponent(pdfName)}` : `/generated-resumes/${pdfName}`,
     generatedAt: new Date().toISOString(),
   };
   await writeFile(join(versionDir, 'metadata.json'), `${JSON.stringify(metadata, null, 2)}\n`, 'utf8');

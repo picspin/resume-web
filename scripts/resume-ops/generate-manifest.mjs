@@ -12,6 +12,7 @@ async function pathExists(path) {
 }
 
 const root = process.cwd()
+const localOnly = process.argv.includes('--local-only')
 const versionsDir = join(root, 'career', 'versions')
 const slugs = await readdir(versionsDir)
 const records = []
@@ -29,6 +30,10 @@ for (const slug of slugs) {
 
 const { publicVersions, careerVersions } = buildManifests(records)
 await mkdir(join(root, 'src', 'data'), { recursive: true })
-await writeFile(join(root, 'src', 'data', 'resume-versions.json'), `${JSON.stringify(publicVersions, null, 2)}\n`, 'utf8')
+if (!localOnly) {
+  await writeFile(join(root, 'src', 'data', 'resume-versions.json'), `${JSON.stringify(publicVersions, null, 2)}\n`, 'utf8')
+}
 await writeFile(join(root, 'src', 'data', 'career-versions.local.json'), `${JSON.stringify(careerVersions, null, 2)}\n`, 'utf8')
-console.log(`Wrote ${publicVersions.length} public resume version(s) and ${careerVersions.length} local career version(s)`)
+console.log(localOnly
+  ? `Wrote ${careerVersions.length} local career version(s)`
+  : `Wrote ${publicVersions.length} public resume version(s) and ${careerVersions.length} local career version(s)`)

@@ -22,6 +22,13 @@ module.exports = {
       version: 'detect',
     },
   },
+  overrides: [
+    {
+      // Node JSON import attributes require a newer parser than ESLint 8 bundles.
+      files: ['src/resume/documents.js'],
+      parser: require.resolve('espree'),
+    },
+  ],
   ignorePatterns: [
     'dist/',
     'node_modules/',
