@@ -9,6 +9,22 @@ import { renderToStaticMarkup } from 'react-dom/server'
 
 const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..', '..')
 
+test('job PDF artifacts survive missing or stale manifest rows', async () => {
+  const { mergeCareerRows, JobsPanel } = await importJsxModule('src/career/CareerConsole.jsx')
+  const job = { id: 'job-pdf', slug: 'clinical-ai', roleTitle: 'Clinical AI Lead', stage: 'apply_pack', status: 'generated', hasPdf: true, pdfPath: '/api/career/pdf/clinical-ai.pdf' }
+  const rows = mergeCareerRows([], [job])
+  assert.equal(rows[0].hasPdf, true)
+  assert.equal(rows[0].pdfPath, job.pdfPath)
+  assert.equal(rows.filter((row) => row.hasPdf).length, 1)
+  const html = renderToStaticMarkup(React.createElement(JobsPanel, { rows, loading: false, loadError: '', selected: null, selectedSlug: '', onSelect: () => {}, onUpdate: () => {} }))
+  assert.match(html, /\/api\/career\/pdf\/clinical-ai.pdf/)
+  const stale = mergeCareerRows([{ slug: job.slug, hasPdf: false, pdfPath: '' }], [job])
+  assert.equal(stale[0].hasPdf, true)
+  assert.equal(stale[0].pdfPath, job.pdfPath)
+  const legacy = mergeCareerRows([{ slug: job.slug, hasPdf: true, pdfPath: '/legacy.pdf' }], [{ ...job, hasPdf: undefined, pdfPath: undefined }])
+  assert.equal(legacy[0].pdfPath, '/legacy.pdf')
+})
+
 test('JD workflow requires explicit saved source and does not offer an implicit master', async () => {
   const { default: Intake } = await importJsxModule('src/career/JdIntakeHelper.jsx')
   const html = renderToStaticMarkup(React.createElement(Intake))
