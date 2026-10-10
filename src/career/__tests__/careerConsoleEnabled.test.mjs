@@ -21,3 +21,9 @@ test('requires Vite dev mode', () => {
   assert.equal(isCareerConsoleEnabled({ env: { DEV: false }, pathname: '/career' }), false);
   assert.equal(isCareerConsoleEnabled({ env: {}, pathname: '/career' }), false);
 });
+
+test('explicit private production build enables only the career route', () => {
+  assert.equal(isCareerConsoleEnabled({ env: { DEV: false, VITE_PRIVATE_WORKSPACE: 'true' }, pathname: '/career' }), true);
+  assert.equal(isCareerConsoleEnabled({ env: { DEV: false, VITE_PRIVATE_WORKSPACE: 'true' }, pathname: '/' }), false);
+  assert.equal(isCareerConsoleEnabled({ env: { VITE_PRIVATE_WORKSPACE: 'false' }, pathname: '/career' }), false);
+});
