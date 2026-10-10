@@ -114,7 +114,7 @@ A visual replacement or expansion for `JdIntakeHelper`. It manages local form st
 
 - `/career` remains gated by local dev mode and `VITE_ENABLE_CAREER_CONSOLE=true`.
 - Default production builds must not include WYSIWYG console markers, local storage keys, command strings, JD workflow copy, or Portfolio Studio implementation strings.
-- Generated project descriptions remain HTML-escaped before being sent to preview payloads because the public resume project renderer currently uses `dangerouslySetInnerHTML`.
+- Generated project descriptions remain HTML-escaped in preview payloads; the resume renderer now uses safe structured rendering rather than raw HTML injection.
 - JD text and project evidence may persist only in browser `localStorage` for local convenience. The UI must offer a clear action.
 
 ## Testing

@@ -3,6 +3,7 @@ import { mkdir, mkdtemp, readFile, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import test from 'node:test'
+import { DatabaseSync } from 'node:sqlite'
 
 import { createCareerOpsKernel } from '../kernel.mjs'
 
@@ -78,6 +79,80 @@ test('createJob gives repeated roles independent artifact slugs', async (t) => {
   assert.equal(second.slug, 'varian-product-lead-2')
 })
 
+test('concurrent same-title jobs keep separate JD files and artifact slugs', async (t) => {
+  const rootDir = await mkdtemp(join(tmpdir(), 'career-ops-concurrent-'))
+  const kernel = createCareerOpsKernel({ rootDir, workflowRunner: async ({ job }) => {
+    await mkdir(join(rootDir, 'career', 'jds'), { recursive: true })
+    await writeFile(join(rootDir, 'career', 'jds', `${job.slug}.md`), job.jdText)
+    return { jdPath: `career/jds/${job.slug}.md` }
+  } })
+  t.after(() => kernel.close())
+  await kernel.initialize()
+  const jobs = await Promise.all(['First JD.', 'Second JD.'].map((jdText) =>
+    kernel.createJob({ company: 'Varian', roleTitle: 'Product Lead', jdText })))
+  assert.notEqual(jobs[0].slug, jobs[1].slug)
+  await Promise.all(jobs.map((job) => kernel.runStage({ jobId: job.id, stage: 'apply_pack' })))
+  for (const job of jobs) {
+    assert.equal(await readFile(join(rootDir, 'career', 'jds', `${job.slug}.md`), 'utf8'), job.jdText)
+  }
+})
+
+test('listJobs exposes the latest PDF artifact without a version manifest', async (t) => {
+  const rootDir = await mkdtemp(join(tmpdir(), 'career-ops-pdf-list-'))
+  let revision = 0
+  const kernel = createCareerOpsKernel({ rootDir, workflowRunner: async () => ({
+    pdfPath: `/api/career/pdf/revision-${++revision}.pdf`,
+  }) })
+  t.after(() => kernel.close())
+  await kernel.initialize()
+  const job = await kernel.createJob({ roleTitle: 'Clinical AI Lead', jdText: 'Clinical workflow.' })
+  assert.equal((await kernel.listJobs())[0].hasPdf, false)
+  await kernel.runStage({ jobId: job.id, stage: 'apply_pack' })
+  await kernel.runStage({ jobId: job.id, stage: 'apply_pack' })
+  const jobs = await kernel.listJobs()
+  assert.equal(jobs.length, 1)
+  assert.equal(jobs[0].hasPdf, true)
+  assert.equal(jobs[0].pdfPath, '/api/career/pdf/revision-2.pdf')
+})
+
+test('slug uniqueness migrates existing databases without deleting colliding history', async (t) => {
+  const rootDir = await mkdtemp(join(tmpdir(), 'career-ops-slug-migration-'))
+  const first = createCareerOpsKernel({ rootDir })
+  await first.initialize()
+  await first.createJob({ roleTitle: 'Engineer', jdText: 'Original evidence.' })
+  first.close()
+  const oldDatabase = new DatabaseSync(join(rootDir, 'career', 'career-ops.db'))
+  oldDatabase.exec('DROP INDEX jobs_slug_unique')
+  oldDatabase.close()
+  const migrated = createCareerOpsKernel({ rootDir })
+  await migrated.initialize()
+  const next = await migrated.createJob({ roleTitle: 'Engineer', jdText: 'New evidence.' })
+  assert.equal(next.slug, 'engineer-2')
+  migrated.close()
+  const corrupt = new DatabaseSync(join(rootDir, 'career', 'career-ops.db'))
+  corrupt.exec("DROP INDEX jobs_slug_unique; UPDATE jobs SET slug = 'engineer'")
+  corrupt.close()
+  const refused = createCareerOpsKernel({ rootDir })
+  t.after(() => refused.close())
+  await assert.rejects(refused.initialize(), /Back up the workspace/)
+  const preserved = new DatabaseSync(join(rootDir, 'career', 'career-ops.db'))
+  assert.equal(preserved.prepare('SELECT COUNT(*) AS count FROM jobs').get().count, 2)
+  preserved.close()
+})
+
+test('workspace failures release the reserved slug without deleting existing files', async (t) => {
+  const rootDir = await mkdtemp(join(tmpdir(), 'career-ops-reservation-'))
+  const kernel = createCareerOpsKernel({ rootDir, idGenerator: () => 'existing' })
+  t.after(() => kernel.close())
+  await kernel.initialize()
+  const directory = join(rootDir, 'career', 'jobs', 'existing')
+  await mkdir(directory)
+  await writeFile(join(directory, 'job.md'), 'Keep this file.')
+  await assert.rejects(kernel.createJob({ roleTitle: 'Engineer', jdText: 'New job.' }), /EEXIST/)
+  assert.equal(await readFile(join(directory, 'job.md'), 'utf8'), 'Keep this file.')
+  assert.deepEqual(await kernel.listJobs(), [])
+})
+
 test('initialize indexes legacy career versions once without moving their files', async (t) => {
   const rootDir = await mkdtemp(join(tmpdir(), 'career-ops-legacy-'))
   const legacyDir = join(rootDir, 'career', 'versions', 'sample-medical-role')
@@ -98,6 +173,7 @@ test('initialize indexes legacy career versions once without moving their files'
 
   const jobs = await kernel.listJobs()
   assert.equal(jobs.length, 1)
+  assert.equal(jobs[0].hasPdf, undefined)
   assert.deepEqual(
     {
       id: jobs[0].id,
