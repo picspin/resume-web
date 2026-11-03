@@ -37,6 +37,12 @@ jobs:
       - name: Run career tests
         timeout-minutes: 5
         run: npm run career:test
+      - name: Verify private production build (not published to Pages)
+        run: npm run build:private
+      - name: Test authenticated Node service and private UI
+        env:
+          RUN_PRIVATE_UI_TEST: '1'
+        run: npm run server:test
       - name: Build public production site
         env:
           VITE_BASE_PATH: /resume-web/

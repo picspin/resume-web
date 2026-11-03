@@ -1,6 +1,6 @@
 # Cloud Deployment State
 
-Last attempted: 2026-10-09. Pages deployment is being prepared; Sites is not live.
+Last verified: 2026-10-09. GitHub Pages is live; Sites is not live.
 
 ## Release Source
 
@@ -20,6 +20,18 @@ Manual run `37808030589` passed validation but skipped deployment because of the
 old `PAGES_ENABLED` gate. The workflow now uses explicit `deploy=true` on `main`
 without that redundant variable. It still validates the release before publishing
 the public build and gives Pages write/OIDC permissions only to the deploy job.
+
+PR #5 passed cloud CI and was merged as
+`2ef1c02bb504fdd7523b9d183cedbd3ace6118ef`. Production run `37809280743`
+successfully validated and deployed that commit.
+
+Live URL: https://picspin.github.io/resume-web/
+
+Chrome verification at 1440x1000 and 390x844 returned HTTP 200, loaded all
+17 images, found no horizontal overflow or page errors, and confirmed that
+local editing/synchronization controls were absent. An initial transient avatar
+load failure was checked separately (HTTP 200, decoded 400px image); a fresh
+full desktop/mobile verification passed without broken images.
 
 ## Codex Cloud / Sites
 

@@ -7,13 +7,14 @@ import { publicBuildPlugin } from './scripts/build/public-build.mjs'
 export default defineConfig(({ command, mode, isPreview }) => ({
   base: loadEnv(mode, process.cwd(), '').VITE_BASE_PATH || (command === 'build' || isPreview ? '/resume-web/' : '/'),
   publicDir: command === 'build' ? false : 'public',
+  define: { 'import.meta.env.VITE_PRIVATE_WORKSPACE': JSON.stringify(mode === 'private' ? 'true' : 'false') },
   plugins: [react(), careerOpsRuntimePlugin(), publicBuildPlugin()],
   server: {
     port: 3000,
     open: true
   },
   build: {
-    outDir: 'dist',
+    outDir: mode === 'private' ? 'dist-private' : 'dist',
     sourcemap: false,
     emptyOutDir: true
   }

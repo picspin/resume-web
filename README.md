@@ -282,3 +282,11 @@ npm audit --audit-level moderate
 ```
 
 Keep dependency updates in `package-lock.json` and avoid publishing local career artifacts.
+
+### Private Node Cloud Application
+
+GitHub Pages remains the public resume. The complete workspace uses a separate
+`npm run build:private` build and `npm start` Node service, with owner authentication
+protecting the editor, Career Console, API and PDF downloads. See
+[private cloud setup](docs/node-cloud-design.md) for required secrets, Docker,
+persistence and the remaining deployment/integration checks. It is not live yet.

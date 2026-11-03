@@ -11,10 +11,11 @@ import * as storage from './resume/storage.js'
 import { isCareerConsoleEnabled, isCareerPath } from './career/careerConsoleEnabled'
 import './App.css'
 
-const CareerConsole = import.meta.env.DEV ? lazy(() => import('./career/CareerConsole')) : null
+const workspaceEnabled = import.meta.env.DEV || import.meta.env.VITE_PRIVATE_WORKSPACE === 'true'
+const CareerConsole = workspaceEnabled ? lazy(() => import('./career/CareerConsole')) : null
 
 function ResumeApp() {
-  const local = import.meta.env.DEV
+  const local = workspaceEnabled
   const [lang, setLang] = useState('en')
   const [selectedVersion, setSelectedVersion] = useState('default')
   const [publicDocument, setPublicDocument] = useState(() => local ? null : createDocument({ mode: 'sample' }))

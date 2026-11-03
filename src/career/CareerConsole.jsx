@@ -258,13 +258,14 @@ export async function loadCareerConsoleState(loadVersions = loadCareerVersions, 
   }
 }
 
-function mergeCareerRows(versionRows, jobs) {
+export function mergeCareerRows(versionRows, jobs) {
   const rowsBySlug = new Map(versionRows.map((row) => [row.slug, row]))
   for (const job of jobs) {
     const slug = job.legacySlug || job.slug
     const existing = rowsBySlug.get(slug)
     rowsBySlug.set(slug, existing
-      ? { ...existing, jobId: job.id, stage: job.stage, runtimeStatus: job.status }
+      ? { ...existing, jobId: job.id, stage: job.stage, runtimeStatus: job.status,
+          hasPdf: job.hasPdf ?? existing.hasPdf, pdfPath: job.pdfPath ?? existing.pdfPath }
       : {
           slug,
           jobId: job.id,
@@ -274,8 +275,8 @@ function mergeCareerRows(versionRows, jobs) {
           status: job.status,
           runtimeStatus: job.status,
           stage: job.stage,
-          hasPdf: false,
-          pdfPath: '',
+          hasPdf: job.hasPdf ?? false,
+          pdfPath: job.pdfPath ?? '',
         })
   }
   return [...rowsBySlug.values()]

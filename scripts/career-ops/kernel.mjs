@@ -255,6 +255,12 @@ export function createCareerOpsKernel({
       const columns = database.prepare('PRAGMA table_info(jobs)').all().map((column) => column.name)
       if (!columns.includes('source_document_json')) database.exec('ALTER TABLE jobs ADD COLUMN source_document_json TEXT')
       if (!columns.includes('request_id')) database.exec('ALTER TABLE jobs ADD COLUMN request_id TEXT')
+      if (database.prepare('SELECT slug FROM jobs GROUP BY slug HAVING COUNT(*) > 1 LIMIT 1').get()) {
+        database.close()
+        database = undefined
+        throw new Error('Duplicate Job slugs found. Back up the workspace and reconcile shared artifacts before migrating.')
+      }
+      database.exec('CREATE UNIQUE INDEX IF NOT EXISTS jobs_slug_unique ON jobs(slug)')
       await importLegacyVersions({ database, rootDir, clock })
     },
 
@@ -264,10 +270,6 @@ export function createCareerOpsKernel({
       const baseSlug = values.slug
       let slug = baseSlug
       let suffix = 2
-      while (database.prepare('SELECT 1 FROM jobs WHERE slug = ?').get(slug)) {
-        slug = `${baseSlug}-${suffix}`
-        suffix += 1
-      }
       const now = clock().toISOString()
       const job = {
         id: idGenerator(),
@@ -281,30 +283,30 @@ export function createCareerOpsKernel({
       }
       const workspaceDir = join(rootDir, 'career', 'jobs', job.id)
       assertWithinRoot(join(rootDir, 'career', 'jobs'), workspaceDir)
+      const insert = database.prepare(`
+        INSERT INTO jobs (
+          id, slug, company, role_title, jd_text, source_url,
+          stage, status, created_at, updated_at, legacy_slug, source_document_json, request_id
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, ?, ?)
+        ON CONFLICT(slug) DO NOTHING
+      `)
+      // Reserve the slug synchronously before filesystem awaits can interleave requests.
+      while (!insert.run(
+        job.id, slug, job.company, job.roleTitle, job.jdText, job.sourceUrl,
+        job.stage, job.status, job.createdAt, job.updatedAt,
+        job.sourceDocument ? JSON.stringify(job.sourceDocument) : null, job.requestId,
+      ).changes) {
+        slug = `${baseSlug}-${suffix++}`
+      }
+      job.slug = slug
+      let createdWorkspace = false
       try {
         await mkdir(workspaceDir, { recursive: false })
+        createdWorkspace = true
         await writeFile(join(workspaceDir, 'job.md'), renderJobMarkdown(job), 'utf8')
-        database.prepare(`
-          INSERT INTO jobs (
-            id, slug, company, role_title, jd_text, source_url,
-            stage, status, created_at, updated_at, legacy_slug, source_document_json, request_id
-          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, ?, ?)
-        `).run(
-          job.id,
-          job.slug,
-          job.company,
-          job.roleTitle,
-          job.jdText,
-          job.sourceUrl,
-          job.stage,
-          job.status,
-          job.createdAt,
-          job.updatedAt,
-          job.sourceDocument ? JSON.stringify(job.sourceDocument) : null,
-          job.requestId,
-        )
       } catch (error) {
-        await rm(workspaceDir, { recursive: true, force: true })
+        database.prepare('DELETE FROM jobs WHERE id = ?').run(job.id)
+        if (createdWorkspace) await rm(workspaceDir, { recursive: true, force: true })
         throw error
       }
       return job
@@ -312,9 +314,20 @@ export function createCareerOpsKernel({
 
     async listJobs() {
       const rows = requireDatabase()
-        .prepare('SELECT * FROM jobs WHERE archived_at IS NULL ORDER BY updated_at DESC, id ASC')
+        .prepare(`
+          SELECT jobs.*, artifacts.path AS pdf_path
+          FROM jobs
+          LEFT JOIN artifacts ON artifacts.rowid = (
+            SELECT rowid FROM artifacts WHERE job_id = jobs.id AND kind = 'pdf' AND path != ''
+            ORDER BY created_at DESC, rowid DESC LIMIT 1
+          )
+          WHERE jobs.archived_at IS NULL ORDER BY jobs.updated_at DESC, jobs.id ASC
+        `)
         .all()
-      return rows.map(mapJobRow)
+      return rows.map((row) => ({
+        ...mapJobRow(row),
+        ...(row.legacy_slug && !row.pdf_path ? {} : { hasPdf: Boolean(row.pdf_path), pdfPath: row.pdf_path || '' }),
+      }))
     },
 
     async listRuns({ limit = 50 } = {}) {

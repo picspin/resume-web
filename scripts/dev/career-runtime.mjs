@@ -111,7 +111,7 @@ export async function dispatchCareerOpsRequest({ method, pathname, payload = {},
   return { status: 404, body: { error: 'Career-Ops route not found.' } }
 }
 
-export function careerOpsRuntimePlugin({ rootDir = process.cwd(), kernel: injectedKernel, resumeSync: injectedResumeSync } = {}) {
+export function createCareerOpsMiddleware({ rootDir = process.cwd(), kernel: injectedKernel, resumeSync: injectedResumeSync, trustRequest = isTrustedCareerRequest } = {}) {
   const resumeSync = injectedResumeSync || createResumeSyncService({ rootDir })
   let kernelPromise
   const getKernel = async () => {
@@ -135,45 +135,49 @@ export function careerOpsRuntimePlugin({ rootDir = process.cwd(), kernel: inject
     return kernelPromise
   }
 
+  return async (request, response) => {
+    if (!trustRequest(request)) {
+      return sendJson(response, 403, { error: 'Career-Ops only accepts same-origin loopback requests.' })
+    }
+    if (request.method === 'POST' && !isJsonRequest(request)) {
+      return sendJson(response, 415, { error: 'Career-Ops POST requests require application/json.' })
+    }
+    try {
+      const pathname = new URL(request.url || '/', 'http://127.0.0.1').pathname
+      const syncRoute = pathname.startsWith('/resume-sync/')
+      if (request.method === 'POST' && (syncRoute || pathname === '/workflow') && !request.headers?.origin) {
+        return sendJson(response, 403, { error: 'A same-origin browser request is required.' })
+      }
+      if (request.headers?.['sec-fetch-site'] === 'cross-site') {
+        return sendJson(response, 403, { error: 'Cross-site requests are not permitted.' })
+      }
+      if (request.method === 'GET' && pathname.startsWith('/pdf/')) {
+        return await sendLocalPdf(rootDir, pathname.slice('/pdf/'.length), response)
+      }
+      const payload = request.method === 'POST' ? await readJsonBody(request, syncRoute || pathname === '/workflow' ? MAX_RESUME_SYNC_REQUEST_BYTES : undefined) : {}
+      if (request.method === 'POST' && pathname === '/workflow' && (!payload?.sourceDocument || typeof payload.requestId !== 'string' || !payload.requestId)) {
+        return sendJson(response, 400, { error: 'Select a resume document and provide a request ID.' })
+      }
+      const result = await dispatchCareerOpsRequest({
+        method: request.method || 'GET',
+        pathname,
+        payload,
+        kernel: syncRoute ? undefined : await getKernel(),
+        resumeSync,
+      })
+      sendJson(response, result.status, result.body)
+    } catch (error) {
+      sendJson(response, error instanceof ResumeSyncError ? error.statusCode : 400, { error: error instanceof ResumeSyncError ? error.message : 'Career-Ops request failed. Check the input and local service configuration.' })
+    }
+  }
+}
+
+export function careerOpsRuntimePlugin(options = {}) {
   return {
     name: 'local-career-ops-runtime',
     apply: 'serve',
     configureServer(server) {
-      server.middlewares.use('/api/career', async (request, response) => {
-        if (!isTrustedCareerRequest(request)) {
-          return sendJson(response, 403, { error: 'Career-Ops only accepts same-origin loopback requests.' })
-        }
-        if (request.method === 'POST' && !isJsonRequest(request)) {
-          return sendJson(response, 415, { error: 'Career-Ops POST requests require application/json.' })
-        }
-        try {
-          const pathname = new URL(request.url || '/', 'http://127.0.0.1').pathname
-          const syncRoute = pathname.startsWith('/resume-sync/')
-          if (request.method === 'POST' && (syncRoute || pathname === '/workflow') && !request.headers?.origin) {
-            return sendJson(response, 403, { error: 'A same-origin browser request is required.' })
-          }
-          if (request.headers?.['sec-fetch-site'] === 'cross-site') {
-            return sendJson(response, 403, { error: 'Cross-site requests are not permitted.' })
-          }
-          if (request.method === 'GET' && pathname.startsWith('/pdf/')) {
-            return await sendLocalPdf(rootDir, pathname.slice('/pdf/'.length), response)
-          }
-          const payload = request.method === 'POST' ? await readJsonBody(request, syncRoute || pathname === '/workflow' ? MAX_RESUME_SYNC_REQUEST_BYTES : undefined) : {}
-          if (request.method === 'POST' && pathname === '/workflow' && (!payload?.sourceDocument || typeof payload.requestId !== 'string' || !payload.requestId)) {
-            return sendJson(response, 400, { error: 'Select a resume document and provide a request ID.' })
-          }
-          const result = await dispatchCareerOpsRequest({
-            method: request.method || 'GET',
-            pathname,
-            payload,
-            kernel: syncRoute ? undefined : await getKernel(),
-            resumeSync,
-          })
-          sendJson(response, result.status, result.body)
-        } catch (error) {
-          sendJson(response, error instanceof ResumeSyncError ? error.statusCode : 400, { error: error instanceof ResumeSyncError ? error.message : 'Career-Ops request failed. Check the input and local service configuration.' })
-        }
-      })
+      server.middlewares.use('/api/career', createCareerOpsMiddleware(options))
     },
   }
 }
